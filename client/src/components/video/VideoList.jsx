@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import InfinityScroll from 'react-infinite-scroll-component';
-import { useGetVideosQuery } from '../../features/videos/videosAPI';
+import { useDispatch } from 'react-redux';
+import { useGetVideosQuery, videosAPI } from '../../features/videos/videosAPI';
 import Common from '../common';
 import VideoCard from './VideoCard';
 
 function VideoList() {
-    const { data: videos, isLoading, error } = useGetVideosQuery();
+    const { data, isLoading, error } = useGetVideosQuery();
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const dispatch = useDispatch();
+
+    const { videos, totalCount } = data || {};
+
+    const fetchMoreData = () => {
+        if (videos.length >= totalCount) {
+            setHasMore(false);
+            return;
+        }
+        setPage((prevPage) => prevPage + 1);
+    };
 
     const videoList = isLoading ? (
         <Common.Loader />
@@ -13,15 +27,26 @@ function VideoList() {
         videos?.map((video) => <VideoCard key={video.id} video={video} />)
     );
 
+    useEffect(() => {
+        if (page > 1) {
+            dispatch(videosAPI.endpoints.getMoreVideos.initiate(page));
+        }
+    }, [page, dispatch]);
+
+    useEffect(() => {
+        if (totalCount > 0) {
+            const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > page;
+            setHasMore(more);
+        }
+    }, [page, totalCount]);
+
     return (
-        <div className="col-span-full lg:col-auto max-h-[570px] overflow-y-auto bg-secondary rounded-md border border-slate-50/10 divide-y divide-slate-600/30">
-            {videoList.length > 0 ? (
+        <div className="col-span-full lg:col-auto max-h-[570px] overflow-y-auto bg-secondary rounded-md border border-slate-50/10 divide-y p-4 divide-slate-600/30">
+            {videoList?.length > 0 ? (
                 <InfinityScroll
                     dataLength={videoList.length}
-                    next={() => {
-                        console.log('next');
-                    }}
-                    hasMore
+                    next={fetchMoreData}
+                    hasMore={hasMore}
                     loader={<Common.Loader inline />}
                     height={530}
                 >

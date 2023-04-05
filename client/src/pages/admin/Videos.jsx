@@ -1,23 +1,21 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import Pagination from 'rc-pagination';
 import React, { useEffect, useState } from 'react';
+import '../../assets/styles/rc-pagination.css';
 import { Common } from '../../components';
 import {
     useAddVideoMutation,
     useDeleteVideoMutation,
     useEditVideoMutation,
-    useGetVideosQuery,
+    useGetMoreVideosQuery,
 } from '../../features/videos/videosAPI';
+import { getTotalPageNumber } from '../../utils';
 
 function Videos() {
-    const { data: videos, isLoading, error } = useGetVideosQuery();
-    const [addVideo, { data: addedVideo, isLoading: isAddedVideoLoading }] = useAddVideoMutation();
-    const [editVideo, { data: editedVideo, isLoading: isEditedVideoLoading }] =
-        useEditVideoMutation();
-    const [deleteVideo] = useDeleteVideoMutation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Video');
     const [isEdit, setIsEdit] = useState(undefined);
-
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -25,7 +23,17 @@ function Videos() {
         duration: '',
         views: '',
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const { data, isLoading, error } = useGetMoreVideosQuery(currentPage);
+    const [addVideo, { data: addedVideo, isLoading: isAddedVideoLoading, error: addVideoError }] =
+        useAddVideoMutation();
+    const [
+        editVideo,
+        { data: editedVideo, isLoading: isEditedVideoLoading, error: editVideoError },
+    ] = useEditVideoMutation();
+    const [deleteVideo, { data: deletedVideo, error: deleteVideoError }] = useDeleteVideoMutation();
 
+    const { videos, totalCount } = data || {};
     const editBtn = (
         <svg
             fill="none"
@@ -61,6 +69,10 @@ function Videos() {
         setIsModalOpen(false);
     };
 
+    const onPaginationChange = (page) => {
+        setCurrentPage(page);
+    };
+
     const handleChange = (e) => {
         setFormData((prevFormData) => ({ ...prevFormData, [e.target.name]: e.target.value }));
     };
@@ -86,10 +98,14 @@ function Videos() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const totalPage = getTotalPageNumber(totalCount);
         if (isEdit) {
-            editVideo({ id: isEdit, data: formData });
+            editVideo({ id: isEdit, data: formData, totalPage });
         } else {
-            addVideo(formData);
+            addVideo({
+                formData,
+                totalPage,
+            });
         }
         setFormData({
             title: '',
@@ -101,7 +117,8 @@ function Videos() {
     };
 
     const handleDelete = (id) => {
-        deleteVideo(id);
+        const totalPage = getTotalPageNumber(totalCount);
+        deleteVideo({ id, totalPage });
     };
 
     const videoForm = (
@@ -194,12 +211,12 @@ function Videos() {
         <Common.Loader />
     ) : (
         videos?.map((video) => (
-            <tr key={video.id}>
+            <tr key={video?.id}>
                 <td className="table-td">
-                    {video.title.length > 70 ? `${video.title.substring(0, 70)}...` : video.title}
+                    {video?.title?.length > 70 ? `${video.title.substring(0, 70)}...` : video.title}
                 </td>
                 <td className="table-td">
-                    {video.description.length > 70
+                    {video?.description?.length > 70
                         ? `${video.description.substring(0, 70)}...`
                         : video.description}
                 </td>
@@ -216,7 +233,30 @@ function Videos() {
     );
 
     return (
-        <div className="px-3 py-20 bg-opacity-10">
+        <div className="px-3 py-10 bg-opacity-10">
+            {(error || addVideoError || editVideoError || deleteVideoError) && (
+                <Common.Error
+                    error={
+                        error ||
+                        addVideoError ||
+                        editVideoError ||
+                        (deleteVideoError && 'Something went wrong')
+                    }
+                />
+            )}
+            {(addedVideo || editedVideo || deletedVideo) && (
+                <Common.Success
+                    message={
+                        addedVideo
+                            ? 'Video added successfully'
+                            : editedVideo
+                            ? 'Video edited successfully'
+                            : deletedVideo
+                            ? 'Video deleted successfully'
+                            : ''
+                    }
+                />
+            )}
             <div className="w-full flex">
                 <button
                     type="button"
@@ -243,7 +283,15 @@ function Videos() {
             ) : (
                 <Common.Info info="No videos found" />
             )}
-            {error && <Common.Error error={error} />}
+
+            <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
+                <Pagination
+                    showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
+                    total={totalCount}
+                    current={currentPage}
+                    onChange={onPaginationChange}
+                />
+            </div>
             <Common.Modal
                 title={title}
                 open={isModalOpen}

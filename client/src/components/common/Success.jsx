@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-function Error({ error }) {
+function Success({ message }) {
     const [show, setShow] = useState(true);
 
     useEffect(() => {
@@ -13,8 +13,8 @@ function Error({ error }) {
     return (
         show && (
             <div
-                id="alert-2"
-                className="flex p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                id="alert-3"
+                className="flex p-4 mb-4 text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
                 role="alert"
             >
                 <svg
@@ -31,18 +31,17 @@ function Error({ error }) {
                     />
                 </svg>
                 <span className="sr-only">Info</span>
-                <div className="ml-3 text-sm font-medium">
-                    {error?.message || error || 'Something went wrong'}
-                </div>
+                <div className="ml-3 text-sm font-medium">{message}</div>
                 <button
                     type="button"
-                    className="ml-auto -mx-1.5 -my-1.5 bg-red-50 text-red-500 rounded-lg focus:ring-2 focus:ring-red-400 p-1.5 hover:bg-red-200 inline-flex h-8 w-8 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-gray-700"
-                    data-dismiss-target="#alert-2"
+                    className="ml-auto -mx-1.5 -my-1.5 bg-green-50 text-green-500 rounded-lg focus:ring-2 focus:ring-green-400 p-1.5 hover:bg-green-200 inline-flex h-8 w-8 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700"
+                    data-dismiss-target="#alert-3"
                     aria-label="Close"
                     onClick={() => setShow(false)}
                 >
                     <span className="sr-only">Close</span>
                     <svg
+                        aria-hidden="true"
                         className="w-5 h-5"
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -60,4 +59,4 @@ function Error({ error }) {
     );
 }
 
-export default Error;
+export default Success;

@@ -39,7 +39,7 @@
             "error",
             {
                 "props": true,
-                "ignorePropertyModificationsFor": ["state"]
+                "ignorePropertyModificationsFor": ["state", "draft"]
             }
         ],
         "no-underscore-dangle": "off",

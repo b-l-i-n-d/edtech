@@ -7,8 +7,14 @@ import {
 
 function AssignmentMarks() {
     const { data: assignmentMarks, isLoading, error } = useGetAssignmentMarksQuery();
-    const [editAssignmentMark, { isLoading: editAssignmentMarkLoading }] =
-        useEditAssignmentMarkMutation();
+    const [
+        editAssignmentMark,
+        {
+            data: edittedAssignmentMark,
+            isLoading: editAssignmentMarkLoading,
+            error: editAssignmentMarkError,
+        },
+    ] = useEditAssignmentMarkMutation();
     const [formData, setFormData] = useState({
         mark: '',
     });
@@ -58,6 +64,8 @@ function AssignmentMarks() {
                 id="mark"
                 className="w-20 h-8 px-2 text-sm text-gray-600 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
                 onChange={handleChange}
+                min={0}
+                max={assignmentMarks?.totalMark}
                 required
             />
             <button type="submit" className="ml-2" disabled={editAssignmentMarkLoading}>
@@ -89,7 +97,12 @@ function AssignmentMarks() {
     );
 
     return (
-        <div className="px-3 py-20 bg-opacity-10">
+        <div className="px-3 py-10 bg-opacity-10">
+            {(error || editAssignmentMarkError) && (
+                <Common.Error error={error || editAssignmentMarkError} />
+            )}
+            {edittedAssignmentMark && <Common.Success message="Assignment Mark Updated" />}
+
             <ul className="assignment-status">
                 <li>
                     Total <span>{totalAssignmentMarks}</span>
@@ -125,7 +138,6 @@ function AssignmentMarks() {
             ) : (
                 <Common.Info info="No Assignment Marks Found" />
             )}
-            {error && <Common.Error error={error} />}
         </div>
     );
 }

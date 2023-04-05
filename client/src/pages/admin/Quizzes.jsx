@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react';
 import { Common } from '../../components';
@@ -11,10 +12,12 @@ import { useGetVideosQuery } from '../../features/videos/videosAPI';
 
 function Quizzes() {
     const { data: quizzes, isLoading, error } = useGetQuizzesQuery();
-    const { data: videos, isLoading: isVideosLoading } = useGetVideosQuery();
-    const [deleteQuiz] = useDeleteQuizMutation();
-    const [addQuiz, { data: addedQuiz, isLoading: isAddedQuizLoading }] = useAddQuizMutation();
-    const [editQuiz, { data: editedQuiz, isLoading: isEditedQuizLoading }] = useEditQuizMutation();
+    const { data: videosData, isLoading: isVideosLoading } = useGetVideosQuery();
+    const [deleteQuiz, { data: deletedQuiz, error: deleteQuizError }] = useDeleteQuizMutation();
+    const [addQuiz, { data: addedQuiz, isLoading: isAddedQuizLoading, error: addQuizError }] =
+        useAddQuizMutation();
+    const [editQuiz, { data: editedQuiz, isLoading: isEditedQuizLoading, error: editQuizError }] =
+        useEditQuizMutation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Quiz');
     const [isEdit, setIsEdit] = useState(undefined);
@@ -29,6 +32,7 @@ function Quizzes() {
         ],
     });
 
+    const { videos } = videosData || {};
     const editBtn = (
         <svg
             fill="none"
@@ -217,14 +221,18 @@ function Quizzes() {
     const quizItems = isLoading ? (
         <Common.Loader />
     ) : (
-        quizzes.map((quiz) => (
+        quizzes?.map((quiz) => (
             <tr key={quiz.id}>
                 <td className="table-td">
                     {quiz.question.length > 50
                         ? `${quiz.question.substring(0, 50)}...`
                         : quiz.question}
                 </td>
-                <td className="table-td">{quiz.video_title}</td>
+                <td className="table-td">
+                    {quiz.video_title.length > 70
+                        ? `${quiz.video_title.substring(0, 70)}...`
+                        : quiz.video_title}
+                </td>
                 <td className="table-td flex gap-x-2 justify-center">
                     <button type="button" onClick={() => handleDelete(quiz.id)}>
                         {deleteBtn}
@@ -238,7 +246,22 @@ function Quizzes() {
     );
 
     return (
-        <div className="px-3 py-20 bg-opacity-10">
+        <div className="px-3 py-10 bg-opacity-10">
+            {(error || deleteQuizError || addQuizError || editQuizError) && (
+                <Common.Error error={error || deleteQuizError || addQuizError || editQuizError} />
+            )}
+            {(editedQuiz || addedQuiz || deletedQuiz) && (
+                <Common.Success
+                    message={
+                        editedQuiz
+                            ? 'Quiz edited successfully'
+                            : deletedQuiz
+                            ? 'Quiz deleted successfully'
+                            : 'Quiz added successfully'
+                    }
+                />
+            )}
+
             <div className="w-full flex">
                 <button
                     type="button"
@@ -265,7 +288,6 @@ function Quizzes() {
             ) : (
                 <Common.Info info="No Quizzes Found" />
             )}
-            {error && <Common.Error error={error} />}
             <Common.Modal
                 title={title}
                 open={isModalOpen}

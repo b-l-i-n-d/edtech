@@ -20,7 +20,7 @@ function VideoCard({ video }) {
                     viewBox="0 0 24 24"
                     strokeWidth="1.5"
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="w-6 h-6 flex-shrink-0 text-gray-400"
                 >
                     <path
                         strokeLinecap="round"
@@ -35,7 +35,7 @@ function VideoCard({ video }) {
                 </svg>
                 {/* <!-- Description --> */}
                 <div clas="flex flex-col w-full">
-                    <p className="text-slate-50 text-sm font-medium">{title}</p>
+                    <p className="text-slate-50 text-sm font-medium line-clamp-2">{title}</p>
 
                     <div
                         className={`${

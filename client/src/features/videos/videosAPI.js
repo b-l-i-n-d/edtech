@@ -9,9 +9,18 @@ export const videosAPI = apiSlice.injectEndpoints({
                 method: 'GET',
             }),
 
+            transformResponse: (response, meta) => {
+                const totalCount = meta.response.headers.get('x-total-count');
+                return {
+                    videos: response,
+                    totalCount,
+                };
+            },
+
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: videos } = await queryFulfilled;
+                    const { data: videosData } = await queryFulfilled;
+                    const { videos } = videosData;
                     const currentVideoId = localStorage?.getItem('currentVideoId');
 
                     if (currentVideoId) {
@@ -25,20 +34,31 @@ export const videosAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         getMoreVideos: build.query({
             query: (page) => ({
                 url: `/videos?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
                 method: 'GET',
             }),
 
+            transformResponse: (response, meta) => {
+                const totalCount = meta.response.headers.get('x-total-count');
+                return {
+                    videos: response,
+                    totalCount,
+                };
+            },
+
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: videos } = await queryFulfilled;
-                    if (videos.length > 0) {
+                    const { data: moreVideosData } = await queryFulfilled;
+                    const { videos: moreVideos } = moreVideosData;
+                    if (moreVideos.length > 0) {
                         await dispatch(
-                            videosAPI.util.updateQueryData('getVideos', undefined, (draft) => {
-                                draft.push(...videos);
-                            })
+                            videosAPI.util.updateQueryData('getVideos', undefined, (draft) => ({
+                                ...draft,
+                                videos: [...draft.videos, ...moreVideos],
+                            }))
                         );
                     }
                 } catch (error) {
@@ -46,36 +66,56 @@ export const videosAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         getVideo: build.query({
             query: (id) => ({
                 url: `/videos/${id}`,
                 method: 'GET',
             }),
         }),
+
         addVideo: build.mutation({
             query: (data) => ({
                 url: '/videos',
                 method: 'POST',
                 body: {
-                    ...data,
+                    ...data.formData,
                     createdAt: new Date(),
                 },
             }),
+
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: video } = await queryFulfilled;
                     if (video) {
                         await dispatch(
-                            videosAPI.util.updateQueryData('getVideos', undefined, (draft) => {
-                                draft.push(video);
-                            })
+                            videosAPI.util.updateQueryData(
+                                'getMoreVideos',
+                                arg.totalPage,
+                                (draft) => ({
+                                    ...draft,
+                                    videos:
+                                        draft.videos.length < import.meta.env.VITE_LIMIT_PER_PAGE
+                                            ? [...draft.videos, video]
+                                            : draft.videos,
+                                })
+                            )
                         );
+                        for (let i = 1; i <= arg.totalPage; i += 1) {
+                            dispatch(
+                                videosAPI.util.updateQueryData('getMoreVideos', i, (draft) => ({
+                                    ...draft,
+                                    totalCount: (Number(draft.totalCount) + 1).toString(),
+                                }))
+                            );
+                        }
                     }
                 } catch (error) {
                     // do nothing
                 }
             },
         }),
+
         editVideo: build.mutation({
             query: ({ id, data }) => ({
                 url: `/videos/${id}`,
@@ -84,13 +124,18 @@ export const videosAPI = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
+                    console.log(arg.totalPage);
                     const { data: video } = await queryFulfilled;
                     if (video) {
                         await dispatch(
-                            videosAPI.util.updateQueryData('getVideos', undefined, (draft) => {
-                                const index = draft.findIndex((v) => v.id === video.id);
-                                draft.splice(index, 1, video);
-                            })
+                            videosAPI.util.updateQueryData(
+                                'getMoreVideos',
+                                arg.totalPage,
+                                (draft) => {
+                                    const index = draft.videos.findIndex((v) => v.id === video.id);
+                                    draft.videos.splice(index, 1, video);
+                                }
+                            )
                         );
                     }
                 } catch (error) {
@@ -98,8 +143,9 @@ export const videosAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         deleteVideo: build.mutation({
-            query: (id) => ({
+            query: ({ id }) => ({
                 url: `/videos/${id}`,
                 method: 'DELETE',
             }),
@@ -108,11 +154,23 @@ export const videosAPI = apiSlice.injectEndpoints({
                     const { data: video } = await queryFulfilled;
                     if (video) {
                         await dispatch(
-                            videosAPI.util.updateQueryData('getVideos', undefined, (draft) => {
-                                const index = draft.findIndex((v) => v.id === video.id);
-                                draft.splice(index, 1);
-                            })
+                            videosAPI.util.updateQueryData(
+                                'getMoreVideos',
+                                arg.totalPage,
+                                (draft) => {
+                                    const index = draft.videos.findIndex((v) => v.id === video.id);
+                                    draft.videos.splice(index, 1);
+                                }
+                            )
                         );
+                        for (let i = 1; i <= arg.totalPage; i += 1) {
+                            dispatch(
+                                videosAPI.util.updateQueryData('getMoreVideos', i, (draft) => ({
+                                    ...draft,
+                                    totalCount: (Number(draft.totalCount) - 1).toString(),
+                                }))
+                            );
+                        }
                     }
                 } catch (error) {
                     // do nothing

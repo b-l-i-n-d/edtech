@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react';
 import { Common } from '../../components';
@@ -11,12 +12,25 @@ import { useGetVideosQuery } from '../../features/videos/videosAPI';
 
 function Assignments() {
     const { data: assignments, isLoading, error } = useGetAssignmentsQuery();
-    const { data: videos, isLoading: isVideoLoading } = useGetVideosQuery();
-    const [deleteAssignment] = useDeleteAssignmentMutation();
-    const [addAssignment, { data: addedAssignment, isLoading: isAddedAssignmentLoading }] =
-        useAddAssignmentMutation();
-    const [editAssignment, { data: editedAssignment, isLoading: isEditedAssignmentLoading }] =
-        useEditAssignmentMutation();
+    const {
+        data: videosData,
+        isLoading: isVideoLoading,
+        error: getVideosError,
+    } = useGetVideosQuery();
+    const [deleteAssignment, { data: deletedAssignment, error: deleteAssignmentError }] =
+        useDeleteAssignmentMutation();
+    const [
+        addAssignment,
+        { data: addedAssignment, isLoading: isAddedAssignmentLoading, error: addAssignmentError },
+    ] = useAddAssignmentMutation();
+    const [
+        editAssignment,
+        {
+            data: editedAssignment,
+            isLoading: isEditedAssignmentLoading,
+            error: editAssignmentError,
+        },
+    ] = useEditAssignmentMutation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Assignment');
     const [isEdit, setIsEdit] = useState(undefined);
@@ -26,6 +40,7 @@ function Assignments() {
         totalMark: 0,
     });
 
+    const { videos } = videosData || {};
     const editBtn = (
         <svg
             fill="none"
@@ -207,7 +222,34 @@ function Assignments() {
     );
 
     return (
-        <div className="px-3 py-20 bg-opacity-10">
+        <div className="px-3 py-10 bg-opacity-10">
+            {(error ||
+                addAssignmentError ||
+                editAssignmentError ||
+                deleteAssignmentError ||
+                getVideosError) && (
+                <Common.Error
+                    error={
+                        error ||
+                        addAssignmentError ||
+                        editAssignmentError ||
+                        deleteAssignmentError ||
+                        getVideosError
+                    }
+                />
+            )}
+
+            {(addedAssignment || editedAssignment || deletedAssignment) && (
+                <Common.Success
+                    success={
+                        addedAssignment
+                            ? 'Assignment Added Successfully'
+                            : editedAssignment
+                            ? 'Assignment Edited Successfully'
+                            : 'Assignment Deleted Successfully'
+                    }
+                />
+            )}
             <div className="w-full flex">
                 <button
                     type="button"
@@ -235,7 +277,6 @@ function Assignments() {
             ) : (
                 <Common.Info info="No Assignments Found" />
             )}
-            {error && <Common.Error error={error} />}
             <Common.Modal
                 open={isModalOpen}
                 onClose={onClose}

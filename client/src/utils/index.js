@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export */
 import generateLeaderboard from './generateLeaderboard';
+import getTotalPageNumber from './getTotalPageNumber';
 
-export { generateLeaderboard };
+export { generateLeaderboard, getTotalPageNumber };
