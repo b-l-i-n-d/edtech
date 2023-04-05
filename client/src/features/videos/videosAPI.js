@@ -35,6 +35,13 @@ export const videosAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        getAllVideos: build.query({
+            query: () => ({
+                url: '/videos',
+                method: 'GET',
+            }),
+        }),
+
         getMoreVideos: build.query({
             query: (page) => ({
                 url: `/videos?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
@@ -124,16 +131,17 @@ export const videosAPI = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    console.log(arg.totalPage);
-                    const { data: video } = await queryFulfilled;
-                    if (video) {
+                    const { data: updatedVideo } = await queryFulfilled;
+                    if (updatedVideo) {
                         await dispatch(
                             videosAPI.util.updateQueryData(
                                 'getMoreVideos',
                                 arg.totalPage,
                                 (draft) => {
-                                    const index = draft.videos.findIndex((v) => v.id === video.id);
-                                    draft.videos.splice(index, 1, video);
+                                    const index = draft.videos.findIndex(
+                                        (v) => v.id === updatedVideo.id
+                                    );
+                                    draft.videos.splice(index, 1, updatedVideo);
                                 }
                             )
                         );
@@ -151,14 +159,16 @@ export const videosAPI = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: video } = await queryFulfilled;
-                    if (video) {
+                    const { data: deletedVideo } = await queryFulfilled;
+                    if (deletedVideo) {
                         await dispatch(
                             videosAPI.util.updateQueryData(
                                 'getMoreVideos',
                                 arg.totalPage,
                                 (draft) => {
-                                    const index = draft.videos.findIndex((v) => v.id === video.id);
+                                    const index = draft.videos.findIndex(
+                                        (v) => v.id === deletedVideo.id
+                                    );
                                     draft.videos.splice(index, 1);
                                 }
                             )
@@ -187,4 +197,5 @@ export const {
     useGetVideosQuery,
     useGetMoreVideosQuery,
     useGetVideoQuery,
+    useLazyGetAllVideosQuery,
 } = videosAPI;

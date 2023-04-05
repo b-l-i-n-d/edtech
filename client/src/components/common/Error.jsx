@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 function Error({ error }) {
     const [show, setShow] = useState(true);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setShow(false);
-        }, 3000);
-        return () => clearTimeout(timer);
-    }, []);
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         setShow(false);
+    //     }, 3000);
+    //     return () => clearTimeout(timer);
+    // }, []);
 
     return (
         show && (
@@ -32,7 +32,7 @@ function Error({ error }) {
                 </svg>
                 <span className="sr-only">Info</span>
                 <div className="ml-3 text-sm font-medium">
-                    {error?.message || error || 'Something went wrong'}
+                    {error?.error || error || 'Something went wrong'}
                 </div>
                 <button
                     type="button"

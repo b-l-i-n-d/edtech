@@ -11,45 +11,78 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                 return response[0];
             },
         }),
+
         getQuizzes: builder.query({
-            query: () => '/quizzes',
+            query: (page) => `/quizzes?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
+
+            transformResponse: (response, meta) => {
+                const totalCount = meta.response.headers.get('x-total-count');
+                return {
+                    quizzes: response,
+                    totalCount,
+                };
+            },
         }),
+
         addQuiz: builder.mutation({
             query: (data) => ({
                 url: '/quizzes',
                 method: 'POST',
-                body: data,
+                body: data.data,
             }),
-            async onQueryStarted(data, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: quiz } = await queryFulfilled;
                     if (quiz) {
-                        dispatch(
-                            quizzesAPI.util.updateQueryData('getQuizzes', undefined, (draft) => {
-                                draft.push(quiz);
-                            })
+                        await dispatch(
+                            quizzesAPI.util.updateQueryData(
+                                'getQuizzes',
+                                arg.totalPage,
+                                (draft) => ({
+                                    ...draft,
+                                    quizzes:
+                                        draft.quizzes.length < import.meta.env.VITE_LIMIT_PER_PAGE
+                                            ? [...draft.quizzes, quiz]
+                                            : draft.quizzes,
+                                })
+                            )
                         );
+                        for (let i = 1; i <= arg.totalPage; i += 1) {
+                            dispatch(
+                                quizzesAPI.util.updateQueryData('getQuizzes', i, (draft) => ({
+                                    ...draft,
+                                    totalCount: (Number(draft.totalCount) + 1).toString(),
+                                }))
+                            );
+                        }
                     }
                 } catch (error) {
                     // do nothing
                 }
             },
         }),
+
         editQuiz: builder.mutation({
-            query: (data) => ({
-                url: `/quizzes/${data.id}`,
+            query: ({ id, data }) => ({
+                url: `/quizzes/${id}`,
                 method: 'PUT',
                 body: data,
             }),
-            async onQueryStarted(data, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedQuiz } = await queryFulfilled;
                     if (updatedQuiz) {
-                        dispatch(
-                            quizzesAPI.util.updateQueryData('getQuizzes', undefined, (draft) => {
-                                const index = draft.findIndex((quiz) => quiz.id === data.id);
-                                draft.splice(index, 1, updatedQuiz);
-                            })
+                        await dispatch(
+                            quizzesAPI.util.updateQueryData(
+                                'getQuizzes',
+                                arg.totalPage,
+                                (draft) => {
+                                    const index = draft.quizzes.findIndex(
+                                        (quiz) => quiz.id === updatedQuiz.id
+                                    );
+                                    draft.quizzes.splice(index, 1, updatedQuiz);
+                                }
+                            )
                         );
                     }
                 } catch (error) {
@@ -57,20 +90,31 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         deleteQuiz: builder.mutation({
-            query: (id) => ({
+            query: ({ id }) => ({
                 url: `/quizzes/${id}`,
                 method: 'DELETE',
             }),
-            async onQueryStarted(id, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    await queryFulfilled;
+                    const { data: deletedQuiz } = await queryFulfilled;
                     dispatch(
-                        quizzesAPI.util.updateQueryData('getQuizzes', undefined, (draft) => {
-                            const index = draft.findIndex((quiz) => quiz.id === id);
-                            draft.splice(index, 1);
+                        quizzesAPI.util.updateQueryData('getQuizzes', arg.totalPage, (draft) => {
+                            const index = draft.quizzes.findIndex(
+                                (quiz) => quiz.id === deletedQuiz.id
+                            );
+                            draft.quizzes.splice(index, 1);
                         })
                     );
+                    for (let i = 1; i <= arg.totalPage; i += 1) {
+                        dispatch(
+                            quizzesAPI.util.updateQueryData('getQuizzes', i, (draft) => ({
+                                ...draft,
+                                totalCount: (Number(draft.totalCount) - 1).toString(),
+                            }))
+                        );
+                    }
                 } catch (error) {
                     // do nothing
                 }

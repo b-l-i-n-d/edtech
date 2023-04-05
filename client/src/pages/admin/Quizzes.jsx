@@ -1,6 +1,11 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import Pagination from 'rc-pagination';
 import React, { useEffect, useState } from 'react';
+// import Select from 'react-select';
+import { useDispatch } from 'react-redux';
+import Select from 'react-select';
+import { AsyncPaginate } from 'react-select-async-paginate';
 import { Common } from '../../components';
 import {
     useAddQuizMutation,
@@ -8,22 +13,24 @@ import {
     useEditQuizMutation,
     useGetQuizzesQuery,
 } from '../../features/quizzes/quizzesAPI';
-import { useGetVideosQuery } from '../../features/videos/videosAPI';
+import {
+    useGetVideosQuery,
+    useLazyGetAllVideosQuery,
+    videosAPI,
+} from '../../features/videos/videosAPI';
+import { getTotalPageNumber } from '../../utils';
 
 function Quizzes() {
-    const { data: quizzes, isLoading, error } = useGetQuizzesQuery();
-    const { data: videosData, isLoading: isVideosLoading } = useGetVideosQuery();
-    const [deleteQuiz, { data: deletedQuiz, error: deleteQuizError }] = useDeleteQuizMutation();
-    const [addQuiz, { data: addedQuiz, isLoading: isAddedQuizLoading, error: addQuizError }] =
-        useAddQuizMutation();
-    const [editQuiz, { data: editedQuiz, isLoading: isEditedQuizLoading, error: editQuizError }] =
-        useEditQuizMutation();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [videosPage, setVideosPage] = useState(1);
+    const [hasMor, setHasMore] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Quiz');
     const [isEdit, setIsEdit] = useState(undefined);
     const [formData, setFormData] = useState({
         question: '',
         video_id: '',
+        video_title: '',
         options: [
             { id: 1, option: '', isCorrect: false },
             { id: 2, option: '', isCorrect: false },
@@ -31,8 +38,18 @@ function Quizzes() {
             { id: 4, option: '', isCorrect: false },
         ],
     });
+    const dispatch = useDispatch();
+    const { data: quizzesData, isLoading, error } = useGetQuizzesQuery(currentPage);
+    const { data: videosData, isLoading: isVideosLoading } = useGetVideosQuery();
+    const [deleteQuiz, { data: deletedQuiz, error: deleteQuizError }] = useDeleteQuizMutation();
+    const [addQuiz, { data: addedQuiz, isLoading: isAddedQuizLoading, error: addQuizError }] =
+        useAddQuizMutation();
+    const [editQuiz, { data: editedQuiz, isLoading: isEditedQuizLoading, error: editQuizError }] =
+        useEditQuizMutation();
+    const [getAllVideos, { data: allVideosData }] = useLazyGetAllVideosQuery();
 
-    const { videos } = videosData || {};
+    const { quizzes, totalCount } = (!isLoading && quizzesData) || {};
+    const { videos, totalCount: totalVideosCount } = (!isVideosLoading && videosData) || {};
     const editBtn = (
         <svg
             fill="none"
@@ -82,6 +99,18 @@ function Quizzes() {
         resetForm();
     };
 
+    const fetchMoreData = () => {
+        if (videos.length >= totalVideosCount) {
+            setHasMore(false);
+            return;
+        }
+        setVideosPage((prevPage) => prevPage + 1);
+    };
+
+    const onPaginationChange = (page) => {
+        setCurrentPage(page);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: name === 'video_id' ? Number(value) : value }));
@@ -114,30 +143,37 @@ function Quizzes() {
             question: quiz.question,
             video_id: quiz.video_id,
             options: quiz.options,
+            video_title: quiz.video_title,
         });
         setIsModalOpen(true);
         setIsEdit(quiz.id);
+        getAllVideos();
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const totalPage = getTotalPageNumber(totalCount);
         if (isEdit) {
             editQuiz({
                 id: isEdit,
-                ...formData,
-                video_title: videos?.find((video) => video.id === formData.video_id)?.title,
+                data: formData,
+                totalPage,
             });
         } else {
             addQuiz({
-                ...formData,
-                video_title: videos?.find((video) => video.id === formData.video_id)?.title,
+                data: formData,
+                totalPage,
             });
         }
         resetForm();
     };
 
     const handleDelete = (id) => {
-        deleteQuiz(id);
+        const totalPage = getTotalPageNumber(totalCount);
+        deleteQuiz({
+            id,
+            totalPage,
+        });
     };
 
     useEffect(() => {
@@ -147,26 +183,80 @@ function Quizzes() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [addedQuiz, editedQuiz]);
 
-    const selectVideo = (
-        <select
-            name="video_id"
-            id="video_id"
-            value={formData.video_id}
-            onChange={handleChange}
-            className="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
-            required
-        >
-            <option value="" hidden>
-                Select Video
-            </option>
-            {!isVideosLoading &&
-                videos.map((video) => (
-                    <option key={video.id} value={video.id}>
-                        {video.title}
-                    </option>
-                ))}
-        </select>
-    );
+    useEffect(() => {
+        if (videosPage > 1) {
+            dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
+        }
+    }, [videosPage, dispatch]);
+
+    useEffect(() => {
+        if (totalCount > 0) {
+            const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > videosPage;
+            setHasMore(more);
+        }
+    }, [videosPage, totalCount]);
+
+    const selectOptions = videos?.map((video) => ({
+        value: video.id,
+        label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
+    }));
+
+    const allVideosSelectOptions = allVideosData?.map((video) => ({
+        value: video.id,
+        label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
+    }));
+
+    const loadOptions = async () => {
+        const filteredOptions = videos?.map((video) => ({
+            value: video.id,
+            label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
+        }));
+        const hasMore = hasMor;
+        if (hasMore) {
+            await fetchMoreData();
+        }
+        return {
+            options: filteredOptions,
+            hasMore,
+        };
+    };
+
+    const selectVideo =
+        title === 'Add Quiz' ? (
+            <AsyncPaginate
+                form="modalForm"
+                name="video_id"
+                id="video_id"
+                defaultOptions
+                value={selectOptions?.find((option) => option.value === formData.video_id)}
+                loadOptions={loadOptions}
+                onChange={(value) =>
+                    setFormData((prevData) => ({
+                        ...prevData,
+                        video_id: value.value,
+                        video_title: value.label,
+                    }))
+                }
+                className="my-react-select-container"
+                classNamePrefix="my-react-select"
+                required
+            />
+        ) : (
+            <Select
+                options={allVideosSelectOptions}
+                onChange={(value) =>
+                    setFormData((prevData) => ({
+                        ...prevData,
+                        video_id: value.value,
+                        video_title: value.label,
+                    }))
+                }
+                value={allVideosSelectOptions?.find((option) => option.value === formData.video_id)}
+                className="my-react-select-container"
+                classNamePrefix="my-react-select"
+                required
+            />
+        );
 
     const quizForm = (
         <form id="modalForm" onSubmit={handleSubmit}>
@@ -288,6 +378,15 @@ function Quizzes() {
             ) : (
                 <Common.Info info="No Quizzes Found" />
             )}
+
+            <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
+                <Pagination
+                    showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
+                    total={totalCount}
+                    current={currentPage}
+                    onChange={onPaginationChange}
+                />
+            </div>
             <Common.Modal
                 title={title}
                 open={isModalOpen}
