@@ -6,53 +6,82 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             query: (id) => `/assignments?video_id=${id}`,
             transformResponse: (response) => response[0],
         }),
+
         getAssignments: builder.query({
-            query: () => `/assignments`,
+            query: (page) =>
+                `/assignments?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
+
+            transformResponse: (response, meta) => {
+                const totalCount = meta.response.headers.get('x-total-count');
+                return {
+                    assignments: response,
+                    totalCount,
+                };
+            },
         }),
+
         addAssignment: builder.mutation({
             query: (data) => ({
                 url: '/assignments',
                 method: 'POST',
-                body: data,
+                body: data.data,
             }),
-            async onQueryStarted(data, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: assignment } = await queryFulfilled;
-                    if (assignment) {
-                        dispatch(
+                    const { data: addedAssignment } = await queryFulfilled;
+                    if (addedAssignment) {
+                        await dispatch(
                             assignmentsAPI.util.updateQueryData(
                                 'getAssignments',
-                                undefined,
-                                (draft) => {
-                                    draft.push(assignment);
-                                }
+                                arg.totalPage,
+                                (draft) => ({
+                                    ...draft,
+                                    assignments:
+                                        draft.assignments.length <
+                                        import.meta.env.VITE_LIMIT_PER_PAGE
+                                            ? [...draft.assignments, addedAssignment]
+                                            : draft.assignments,
+                                })
                             )
                         );
+                        for (let i = 1; i <= arg.totalPage; i += 1) {
+                            dispatch(
+                                assignmentsAPI.util.updateQueryData(
+                                    'getAssignments',
+                                    i,
+                                    (draft) => ({
+                                        ...draft,
+                                        totalCount: (Number(draft.totalCount) + 1).toString(),
+                                    })
+                                )
+                            );
+                        }
                     }
                 } catch (error) {
                     // do nothing
                 }
             },
         }),
+
         editAssignment: builder.mutation({
-            query: (data) => ({
-                url: `/assignments/${data.id}`,
+            query: ({ id, data }) => ({
+                url: `/assignments/${id}`,
                 method: 'PUT',
                 body: data,
             }),
-            async onQueryStarted(data, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedAssignment } = await queryFulfilled;
                     if (updatedAssignment) {
                         dispatch(
                             assignmentsAPI.util.updateQueryData(
                                 'getAssignments',
-                                undefined,
+                                arg.totalPage,
                                 (draft) => {
-                                    const index = draft.findIndex(
-                                        (assignment) => assignment.id === data.id
+                                    const index = draft.assignments.findIndex(
+                                        (assignment) => assignment.id === updatedAssignment.id
                                     );
-                                    draft.splice(index, 1, updatedAssignment);
+                                    draft.assignments.splice(index, 1, updatedAssignment);
                                 }
                             )
                         );
@@ -62,27 +91,40 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         deleteAssignment: builder.mutation({
-            query: (id) => ({
+            query: ({ id }) => ({
                 url: `/assignments/${id}`,
                 method: 'DELETE',
             }),
-            async onQueryStarted(id, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: deletedAssignment } = await queryFulfilled;
                     if (deletedAssignment) {
                         dispatch(
                             assignmentsAPI.util.updateQueryData(
                                 'getAssignments',
-                                undefined,
+                                arg.currentPage,
                                 (draft) => {
-                                    const index = draft.findIndex(
+                                    const index = draft.assignments.findIndex(
                                         (assignment) => assignment.id === deletedAssignment.id
                                     );
-                                    draft.splice(index, 1);
+                                    draft.assignments.splice(index, 1);
                                 }
                             )
                         );
+                        for (let i = 1; i <= arg.totalPage; i += 1) {
+                            dispatch(
+                                assignmentsAPI.util.updateQueryData(
+                                    'getAssignments',
+                                    i,
+                                    (draft) => ({
+                                        ...draft,
+                                        totalCount: (Number(draft.totalCount) - 1).toString(),
+                                    })
+                                )
+                            );
+                        }
                     }
                 } catch (error) {
                     // do nothing

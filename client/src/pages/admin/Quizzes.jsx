@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import Pagination from 'rc-pagination';
 import React, { useEffect, useState } from 'react';
-// import Select from 'react-select';
 import { useDispatch } from 'react-redux';
 import Select from 'react-select';
 import { AsyncPaginate } from 'react-select-async-paginate';
@@ -23,7 +22,7 @@ import { getTotalPageNumber } from '../../utils';
 function Quizzes() {
     const [currentPage, setCurrentPage] = useState(1);
     const [videosPage, setVideosPage] = useState(1);
-    const [hasMor, setHasMore] = useState(true);
+    const [hasMore, setHasMore] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Quiz');
     const [isEdit, setIsEdit] = useState(undefined);
@@ -172,91 +171,71 @@ function Quizzes() {
         const totalPage = getTotalPageNumber(totalCount);
         deleteQuiz({
             id,
+            currentPage,
             totalPage,
         });
     };
 
-    useEffect(() => {
-        if (addedQuiz || editedQuiz) {
-            onClose();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [addedQuiz, editedQuiz]);
-
-    useEffect(() => {
-        if (videosPage > 1) {
-            dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
-        }
-    }, [videosPage, dispatch]);
-
-    useEffect(() => {
-        if (totalCount > 0) {
-            const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > videosPage;
-            setHasMore(more);
-        }
-    }, [videosPage, totalCount]);
-
-    const selectOptions = videos?.map((video) => ({
+    const selectVideoOptions = videos?.map((video) => ({
         value: video.id,
-        label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
+        label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
     const allVideosSelectOptions = allVideosData?.map((video) => ({
         value: video.id,
-        label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
+        label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
     const loadOptions = async () => {
-        const filteredOptions = videos?.map((video) => ({
-            value: video.id,
-            label: video.title.length > 30 ? `${video.title.slice(0, 60)}...` : video.title,
-        }));
-        const hasMore = hasMor;
-        if (hasMore) {
+        const transformedOptions = selectVideoOptions;
+        const more = hasMore;
+        if (more) {
             await fetchMoreData();
         }
         return {
-            options: filteredOptions,
-            hasMore,
+            options: transformedOptions,
+            hasMore: more,
         };
     };
 
-    const selectVideo =
-        title === 'Add Quiz' ? (
-            <AsyncPaginate
-                form="modalForm"
-                name="video_id"
-                id="video_id"
-                defaultOptions
-                value={selectOptions?.find((option) => option.value === formData.video_id)}
-                loadOptions={loadOptions}
-                onChange={(value) =>
-                    setFormData((prevData) => ({
-                        ...prevData,
-                        video_id: value.value,
-                        video_title: value.label,
-                    }))
-                }
-                className="my-react-select-container"
-                classNamePrefix="my-react-select"
-                required
-            />
-        ) : (
-            <Select
-                options={allVideosSelectOptions}
-                onChange={(value) =>
-                    setFormData((prevData) => ({
-                        ...prevData,
-                        video_id: value.value,
-                        video_title: value.label,
-                    }))
-                }
-                value={allVideosSelectOptions?.find((option) => option.value === formData.video_id)}
-                className="my-react-select-container"
-                classNamePrefix="my-react-select"
-                required
-            />
-        );
+    const selectVideo = !isEdit ? (
+        <AsyncPaginate
+            form="modalForm"
+            name="video_id"
+            id="video_id"
+            defaultOptions
+            value={selectVideoOptions?.find((option) => option.value === formData.video_id)}
+            loadOptions={loadOptions}
+            onChange={(value) =>
+                setFormData((prevData) => ({
+                    ...prevData,
+                    video_id: value.value,
+                    video_title: value.label,
+                }))
+            }
+            className="my-react-select-container"
+            classNamePrefix="my-react-select"
+            required
+        />
+    ) : (
+        <Select
+            form="modalForm"
+            name="video_id"
+            id="video_id"
+            options={allVideosSelectOptions}
+            onChange={(value) =>
+                setFormData((prevData) => ({
+                    ...prevData,
+                    video_id: value.value,
+                    video_title: value.label,
+                }))
+            }
+            value={allVideosSelectOptions?.find((option) => option.value === formData.video_id)}
+            className="my-react-select-container"
+            classNamePrefix="my-react-select"
+            required
+        />
+    );
 
     const quizForm = (
         <form id="modalForm" onSubmit={handleSubmit}>
@@ -334,6 +313,26 @@ function Quizzes() {
             </tr>
         ))
     );
+
+    useEffect(() => {
+        if (addedQuiz || editedQuiz) {
+            onClose();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [addedQuiz, editedQuiz]);
+
+    useEffect(() => {
+        if (videosPage > 1) {
+            dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
+        }
+    }, [videosPage, dispatch]);
+
+    useEffect(() => {
+        if (totalCount > 0) {
+            const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > videosPage;
+            setHasMore(more);
+        }
+    }, [videosPage, totalCount]);
 
     return (
         <div className="px-3 py-10 bg-opacity-10">

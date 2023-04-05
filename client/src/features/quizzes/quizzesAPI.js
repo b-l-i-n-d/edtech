@@ -32,8 +32,8 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: quiz } = await queryFulfilled;
-                    if (quiz) {
+                    const { data: addedQuiz } = await queryFulfilled;
+                    if (addedQuiz) {
                         await dispatch(
                             quizzesAPI.util.updateQueryData(
                                 'getQuizzes',
@@ -42,7 +42,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                                     ...draft,
                                     quizzes:
                                         draft.quizzes.length < import.meta.env.VITE_LIMIT_PER_PAGE
-                                            ? [...draft.quizzes, quiz]
+                                            ? [...draft.quizzes, addedQuiz]
                                             : draft.quizzes,
                                 })
                             )
@@ -100,7 +100,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                 try {
                     const { data: deletedQuiz } = await queryFulfilled;
                     dispatch(
-                        quizzesAPI.util.updateQueryData('getQuizzes', arg.totalPage, (draft) => {
+                        quizzesAPI.util.updateQueryData('getQuizzes', arg.currentPage, (draft) => {
                             const index = draft.quizzes.findIndex(
                                 (quiz) => quiz.id === deletedQuiz.id
                             );

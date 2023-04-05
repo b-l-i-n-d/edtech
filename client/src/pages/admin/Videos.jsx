@@ -118,7 +118,7 @@ function Videos() {
 
     const handleDelete = (id) => {
         const totalPage = getTotalPageNumber(totalCount);
-        deleteVideo({ id, totalPage });
+        deleteVideo({ id, currentPage, totalPage });
     };
 
     const videoForm = (
