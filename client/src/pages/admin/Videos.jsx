@@ -11,8 +11,10 @@ import {
     useGetMoreVideosQuery,
 } from '../../features/videos/videosAPI';
 import { getTotalPageNumber } from '../../utils';
+import { useTitle } from '../../hooks';
 
 function Videos() {
+    useTitle('Videos');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('Add Video');
     const [isEdit, setIsEdit] = useState(undefined);

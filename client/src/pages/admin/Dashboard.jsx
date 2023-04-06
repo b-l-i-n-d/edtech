@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTitle } from '../../hooks';
 
 function Dashboard() {
+    useTitle('Dashboard');
+
     return (
         <div className="px-3 md:lg:xl:px-40  py-20 bg-opacity-10">
             <div className="grid grid-cols-1 md:grid-cols-2  gap-6 p-8">

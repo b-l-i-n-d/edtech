@@ -223,7 +223,7 @@ function CoursePlayer() {
                                     </p>
 
                                     <p className="mb-3 font-normal text-gray-400">
-                                        Score:{' '}
+                                        Your score:{' '}
                                         <span className="font-bold text-white">
                                             {quizMark?.mark}
                                         </span>
@@ -232,7 +232,7 @@ function CoursePlayer() {
                                         to="quiz"
                                         className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
                                     >
-                                        Read more
+                                        দেখুন
                                         <svg
                                             aria-hidden="true"
                                             className="w-4 h-4 ml-2 -mr-1"

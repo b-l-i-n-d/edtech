@@ -6,8 +6,10 @@ import {
     useGetAssignmentMarksByStatusQuery,
     useGetAssignmentMarksQuery,
 } from '../../features/assignmentMark/assignmentMarkAPI';
+import { useTitle } from '../../hooks';
 
 function AssignmentMarks() {
+    useTitle('Assignment Marks');
     const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
         mark: '',

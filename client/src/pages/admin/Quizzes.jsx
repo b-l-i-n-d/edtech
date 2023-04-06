@@ -18,8 +18,10 @@ import {
     videosAPI,
 } from '../../features/videos/videosAPI';
 import { getTotalPageNumber } from '../../utils';
+import { useTitle } from '../../hooks';
 
 function Quizzes() {
+    useTitle('Quizzes');
     const [currentPage, setCurrentPage] = useState(1);
     const [videosPage, setVideosPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);

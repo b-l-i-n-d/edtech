@@ -28,7 +28,18 @@ function Navbar() {
                             Leaderboard
                         </Link>
                     )}
-                    <h2 className={pathname !== '/leaderboard' ? 'font-bold' : 'text-white'}>
+                    {role === 'admin' && (
+                        <Link to="/" className={pathname === '/admin' ? 'font-bold' : 'text-white'}>
+                            Dashboard
+                        </Link>
+                    )}
+                    <h2
+                        className={
+                            pathname !== '/admin' && pathname !== '/leaderboard'
+                                ? 'font-bold'
+                                : 'text-white'
+                        }
+                    >
                         {name}
                     </h2>
                     <button
