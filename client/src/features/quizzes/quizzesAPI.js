@@ -65,7 +65,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
         editQuiz: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/quizzes/${id}`,
-                method: 'PUT',
+                method: 'PATCH',
                 body: data,
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -75,7 +75,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                         await dispatch(
                             quizzesAPI.util.updateQueryData(
                                 'getQuizzes',
-                                arg.totalPage,
+                                arg.currentPage,
                                 (draft) => {
                                     const index = draft.quizzes.findIndex(
                                         (quiz) => quiz.id === updatedQuiz.id

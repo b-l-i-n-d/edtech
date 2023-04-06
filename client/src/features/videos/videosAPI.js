@@ -126,7 +126,7 @@ export const videosAPI = apiSlice.injectEndpoints({
         editVideo: build.mutation({
             query: ({ id, data }) => ({
                 url: `/videos/${id}`,
-                method: 'PUT',
+                method: 'PATCH',
                 body: data,
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -136,7 +136,7 @@ export const videosAPI = apiSlice.injectEndpoints({
                         await dispatch(
                             videosAPI.util.updateQueryData(
                                 'getMoreVideos',
-                                arg.totalPage,
+                                arg.currentPage,
                                 (draft) => {
                                     const index = draft.videos.findIndex(
                                         (v) => v.id === updatedVideo.id

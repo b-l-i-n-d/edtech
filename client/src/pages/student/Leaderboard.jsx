@@ -9,7 +9,9 @@ function Leaderboard() {
     const currentUser = useSelector((state) => state.auth.user);
     const { data: users } = useGetUsersQuery();
     const { data: quizMarks } = useGetQuizMarksQuery();
-    const { data: assignmentMarks } = useGetAssignmentMarksQuery();
+    const { data: assignmentMarksData } = useGetAssignmentMarksQuery();
+
+    const { assignmentMarks } = assignmentMarksData || {};
 
     const generatedLeaderboard = useMemo(
         () =>

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { Common, Video } from '../../components';
@@ -18,16 +18,12 @@ function CoursePlayer() {
     const dispatch = useDispatch();
     const { data: video, isLoading: isGetVideoLoading, error } = useGetVideoQuery(currentVideoId);
     const { data: assignment } = useGetAssignmentsByVideoIdQuery(currentVideoId);
-    const { data: assignmentMark, isLoading: isGetAssignmentMarkLoading } =
-        useGetAssignmentMarksByAssignmentIdQuery(currentVideoId);
+    const { data: assignmentMark } = useGetAssignmentMarksByAssignmentIdQuery(currentVideoId);
     const { data: quizMark, isLoading: isGetQuizMarkLoading } =
         useGetQuizMarkByVideoIdQuery(currentVideoId);
     const { data: quiz, isLoading: isGetQuizLoading } = useGetQuizzesByVideoIdQuery(currentVideoId);
-    const [
-        addAssignmentMark,
-        { data: addedAssignmentMark, isLoading: isAddAssignmentMarkLoading },
-    ] = useAddAssignmentMarkMutation();
-    const [submittedAssignment, setSubmittedAssignment] = useState(undefined);
+    const [addAssignmentMark, { isLoading: isAddAssignmentMarkLoading }] =
+        useAddAssignmentMarkMutation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [formData, setFormData] = useState({
@@ -107,13 +103,10 @@ function CoursePlayer() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        >
-                            {submittedAssignment?.repo_link}
-                        </th>
+                    <tr className="border-b bg-gray-800 border-gray-700  hover:bg-gray-600">
+                        <td className="px-6 py-4 font-medium  break-all text-white">
+                            {assignmentMark?.repo_link}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -121,7 +114,7 @@ function CoursePlayer() {
     );
 
     const assignmentBtn = () => {
-        if (!submittedAssignment && assignment) {
+        if (!assignmentMark && assignment) {
             return (
                 <button
                     className="px-3 font-bold py-1 border border-cyan text-cyan rounded-full text-sm hover:bg-cyan hover:text-primary"
@@ -133,17 +126,17 @@ function CoursePlayer() {
             );
         }
 
-        if (submittedAssignment) {
+        if (assignmentMark) {
             return (
                 <>
                     <span className="px-3 font-bold py-1 text-white rounded-full text-sm bg-gradient-to-r from-cyan-600 to-blue-700">
-                        সর্বমোট নাম্বার - {submittedAssignment?.totalMark}
+                        সর্বমোট নাম্বার - {assignmentMark?.totalMark}
                     </span>
                     <span className="px-3 font-bold py-1 text-white rounded-full text-sm bg-gradient-to-r from-blue-600 from-10% to-green-600 to-90%">
                         প্রাপ্ত নাম্বার -{' '}
-                        {submittedAssignment?.status === 'published'
-                            ? submittedAssignment?.mark
-                            : submittedAssignment?.status}
+                        {assignmentMark?.status === 'published'
+                            ? assignmentMark?.mark
+                            : assignmentMark?.status}
                     </span>
                     <button
                         className="px-3 font-bold py-1 border border-cyan text-black rounded-full text-sm bg-cyan-500 hover:bg-white transition-all duration-300"
@@ -184,23 +177,6 @@ function CoursePlayer() {
         return null;
     };
 
-    useEffect(() => {
-        if (!isGetAssignmentMarkLoading && assignmentMark) {
-            setSubmittedAssignment(assignmentMark);
-        } else if (!isAddAssignmentMarkLoading && addedAssignmentMark) {
-            setSubmittedAssignment(addedAssignmentMark);
-        }
-        if (!assignment || (!assignmentMark && !addedAssignmentMark)) {
-            setSubmittedAssignment(null);
-        }
-    }, [
-        addedAssignmentMark,
-        assignment,
-        assignmentMark,
-        isAddAssignmentMarkLoading,
-        isGetAssignmentMarkLoading,
-    ]);
-
     return (
         <div className="grid grid-cols-3 gap-2 lg:gap-8">
             <div className="col-span-full w-full space-y-8 lg:col-span-2">
@@ -231,6 +207,46 @@ function CoursePlayer() {
 
                                 {quizBtn()}
                             </div>
+                            {quizMark && (
+                                <div className="max-w-xs p-6 border rounded-lg shadow bg-gray-800 border-gray-700 mt-4">
+                                    <h5 className="mb-2 text-md font-bold tracking-tight text-gray-900 dark:text-white">
+                                        কুইজ রেজাল্ট
+                                    </h5>
+
+                                    <p className="mb-1 font-normal text-gray-400">
+                                        Total mark:{' '}
+                                        <span className="font-bold text-white">
+                                            {quizMark?.totalMark}
+                                        </span>
+                                    </p>
+
+                                    <p className="mb-3 font-normal text-gray-400">
+                                        Score:{' '}
+                                        <span className="font-bold text-white">
+                                            {quizMark?.mark}
+                                        </span>
+                                    </p>
+                                    <Link
+                                        to="quiz"
+                                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+                                    >
+                                        Read more
+                                        <svg
+                                            aria-hidden="true"
+                                            className="w-4 h-4 ml-2 -mr-1"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                                clipRule="evenodd"
+                                            />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            )}
                             <p className="mt-4 text-sm text-slate-400 leading-6">
                                 {video?.description}
                             </p>
@@ -246,9 +262,9 @@ function CoursePlayer() {
                 onOk={handleSubmit}
                 onClose={onClose}
                 confirmLoading={isAddAssignmentMarkLoading}
-                disableSubmit={!!submittedAssignment}
+                disableSubmit={!!assignmentMark}
             >
-                {!submittedAssignment ? assignmentMarkForm : showModal}
+                {!assignmentMark ? assignmentMarkForm : showModal}
             </Common.Modal>
         </div>
     );

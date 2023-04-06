@@ -1,12 +1,18 @@
+import Pagination from 'rc-pagination';
 import React, { useState } from 'react';
 import Common from '../../components/common';
 import {
     useEditAssignmentMarkMutation,
+    useGetAssignmentMarksByStatusQuery,
     useGetAssignmentMarksQuery,
 } from '../../features/assignmentMark/assignmentMarkAPI';
 
 function AssignmentMarks() {
-    const { data: assignmentMarks, isLoading, error } = useGetAssignmentMarksQuery();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [formData, setFormData] = useState({
+        mark: '',
+    });
+    const { data: assignmentMarksData, isLoading, error } = useGetAssignmentMarksQuery(currentPage);
     const [
         editAssignmentMark,
         {
@@ -15,14 +21,15 @@ function AssignmentMarks() {
             error: editAssignmentMarkError,
         },
     ] = useEditAssignmentMarkMutation();
-    const [formData, setFormData] = useState({
-        mark: '',
-    });
+    const { data: assignmentsMarksByStatus, isLoading: isGetAssignmentMarkPendingLoading } =
+        useGetAssignmentMarksByStatusQuery('pending');
 
-    const totalAssignmentMarks = assignmentMarks?.length;
-    const pendingAssignmentMarks = assignmentMarks?.filter(
-        (assignmentMark) => assignmentMark.status === 'pending'
-    ).length;
+    const { assignmentMarks, totalCount } = assignmentMarksData || {};
+    const pendingMarks = !isGetAssignmentMarkPendingLoading && assignmentsMarksByStatus;
+
+    const onPaginationChange = (page) => {
+        setCurrentPage(page);
+    };
 
     const submitBtn = (
         <svg
@@ -42,12 +49,12 @@ function AssignmentMarks() {
 
     const handleEditAssignmentMark = (e) => {
         e.preventDefault();
-        const assignmentMark = assignmentMarks.find(
-            (assMark) => assMark.id === Number(e.target.id)
-        );
         editAssignmentMark({
-            ...assignmentMark,
-            mark: formData.mark,
+            id: Number(e.target.id),
+            data: {
+                mark: formData.mark,
+            },
+            currentPage,
         });
     };
 
@@ -79,7 +86,11 @@ function AssignmentMarks() {
     ) : (
         assignmentMarks?.map((assignmentMark) => (
             <tr key={assignmentMark.id}>
-                <td className="table-td">{assignmentMark.title}</td>
+                <td className="table-td">
+                    {assignmentMark.title.length > 30
+                        ? `${assignmentMark.title.substring(0, 30)}...`
+                        : assignmentMark.title}
+                </td>
                 <td className="table-td">{new Date(assignmentMark.createdAt).toDateString()}</td>
                 <td className="table-td">{assignmentMark.student_name}</td>
                 <td className="table-td">
@@ -105,18 +116,13 @@ function AssignmentMarks() {
 
             <ul className="assignment-status">
                 <li>
-                    Total <span>{totalAssignmentMarks}</span>
+                    Total <span>{totalCount}</span>
                 </li>
                 <li>
-                    Pending <span>{pendingAssignmentMarks}</span>
+                    Pending <span>{pendingMarks}</span>
                 </li>
                 <li>
-                    Mark Sent{' '}
-                    <span>
-                        {totalAssignmentMarks &&
-                            pendingAssignmentMarks &&
-                            totalAssignmentMarks - pendingAssignmentMarks}
-                    </span>
+                    Mark Sent <span>{totalCount && pendingMarks && totalCount - pendingMarks}</span>
                 </li>
             </ul>
             {assignmentMarkList?.length > 0 ? (
@@ -138,6 +144,15 @@ function AssignmentMarks() {
             ) : (
                 <Common.Info info="No Assignment Marks Found" />
             )}
+
+            <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
+                <Pagination
+                    showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
+                    total={totalCount}
+                    current={currentPage}
+                    onChange={onPaginationChange}
+                />
+            </div>
         </div>
     );
 }

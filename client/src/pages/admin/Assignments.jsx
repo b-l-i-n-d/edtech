@@ -144,14 +144,14 @@ function Assignments() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const totalPage = getTotalPageNumber(totalCount);
         if (isEdit) {
             editAssignment({
                 id: isEdit,
                 data: formData,
-                totalPage,
+                currentPage,
             });
         } else {
+            const totalPage = getTotalPageNumber(totalCount);
             addAssignment({
                 data: formData,
                 totalPage,

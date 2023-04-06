@@ -6,7 +6,7 @@ function VideoCard({ video }) {
     const { id, title, views, duration } = video;
 
     return (
-        <Link to={`/videos/${id}`}>
+        <Link id={`video-${id}`} to={`/videos/${id}`}>
             <div
                 className={`w-full flex flex-row gap-2 cursor-pointer p-2 py-3 ${
                     id === Number(currentVideoId)

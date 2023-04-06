@@ -156,7 +156,7 @@ function Quizzes() {
             editQuiz({
                 id: isEdit,
                 data: formData,
-                totalPage,
+                currentPage,
             });
         } else {
             addQuiz({

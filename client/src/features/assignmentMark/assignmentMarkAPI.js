@@ -36,6 +36,7 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
         getAssignmentMarksByAssignmentId: builder.query({
             query: (id) =>
                 `/assignmentMark?assignment_id=${id}&student_id=${
@@ -48,37 +49,63 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
                 return null;
             },
         }),
+
         getAssignmentMarks: builder.query({
-            query: () => '/assignmentMark',
+            query: (page) =>
+                `/assignmentMark?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
+
+            transformResponse: (response, meta) => {
+                const totalCount = meta.response.headers.get('x-total-count');
+                return {
+                    assignmentMarks: response,
+                    totalCount,
+                };
+            },
         }),
+
+        getAssignmentMarksByStatus: builder.query({
+            query: (status) => `/assignmentMark?status=${status}`,
+
+            transformResponse: (response) => response.length,
+        }),
+
         editAssignmentMark: builder.mutation({
-            query: (data) => ({
-                url: `/assignmentMark/${data.id}`,
-                method: 'PUT',
+            query: ({ id, data }) => ({
+                url: `/assignmentMark/${id}`,
+                method: 'PATCH',
                 body: {
                     ...data,
                     status: 'published',
                 },
             }),
-            async onQueryStarted(data, { dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedAssignmentMark } = await queryFulfilled;
                     if (updatedAssignmentMark) {
-                        dispatch(
+                        await dispatch(
                             assignmentMarkAPI.util.updateQueryData(
                                 'getAssignmentMarks',
-                                undefined,
+                                arg.currentPage,
                                 (draft) => {
-                                    const index = draft.findIndex(
-                                        (assignmentMark) => assignmentMark.id === data.id
+                                    const index = draft.assignmentMarks.findIndex(
+                                        (assignmentMark) =>
+                                            assignmentMark.id === updatedAssignmentMark.id
                                     );
-                                    draft.splice(index, 1, updatedAssignmentMark);
+                                    draft.assignmentMarks.splice(index, 1, updatedAssignmentMark);
                                 }
+                            )
+                        );
+
+                        await dispatch(
+                            assignmentMarkAPI.util.updateQueryData(
+                                'getAssignmentMarksByStatus',
+                                'pending',
+                                (draft) => draft - 1
                             )
                         );
                     }
                 } catch (err) {
-                    console.log(err);
+                    // do nothing
                 }
             },
         }),
@@ -89,5 +116,6 @@ export const {
     useAddAssignmentMarkMutation,
     useGetAssignmentMarksByAssignmentIdQuery,
     useGetAssignmentMarksQuery,
+    useGetAssignmentMarksByStatusQuery,
     useEditAssignmentMarkMutation,
 } = assignmentMarkAPI;

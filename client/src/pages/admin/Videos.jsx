@@ -98,10 +98,10 @@ function Videos() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const totalPage = getTotalPageNumber(totalCount);
         if (isEdit) {
-            editVideo({ id: isEdit, data: formData, totalPage });
+            editVideo({ id: isEdit, data: formData, currentPage });
         } else {
+            const totalPage = getTotalPageNumber(totalCount);
             addVideo({
                 formData,
                 totalPage,

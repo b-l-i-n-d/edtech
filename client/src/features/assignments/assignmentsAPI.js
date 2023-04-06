@@ -66,7 +66,7 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
         editAssignment: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/assignments/${id}`,
-                method: 'PUT',
+                method: 'PATCH',
                 body: data,
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -76,7 +76,7 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
                         dispatch(
                             assignmentsAPI.util.updateQueryData(
                                 'getAssignments',
-                                arg.totalPage,
+                                arg.currentPage,
                                 (draft) => {
                                     const index = draft.assignments.findIndex(
                                         (assignment) => assignment.id === updatedAssignment.id
