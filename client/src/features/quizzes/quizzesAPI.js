@@ -98,13 +98,10 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: deletedQuiz } = await queryFulfilled;
-                    dispatch(
+                    await queryFulfilled;
+                    await dispatch(
                         quizzesAPI.util.updateQueryData('getQuizzes', arg.currentPage, (draft) => {
-                            const index = draft.quizzes.findIndex(
-                                (quiz) => quiz.id === deletedQuiz.id
-                            );
-                            draft.quizzes.splice(index, 1);
+                            draft.quizzes = draft.quizzes.filter((quiz) => quiz.id !== arg.id);
                         })
                     );
                     for (let i = 1; i <= arg.totalPage; i += 1) {

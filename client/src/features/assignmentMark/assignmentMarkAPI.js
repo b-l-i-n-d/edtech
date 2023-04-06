@@ -32,7 +32,7 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
                         );
                     }
                 } catch (err) {
-                    console.log(err);
+                    // do nothing
                 }
             },
         }),

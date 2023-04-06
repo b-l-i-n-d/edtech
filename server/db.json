@@ -4531,90 +4531,6 @@
         }
       ],
       "video_title": "Cras non velit nec nisi vulputate nonummy."
-    },
-    {
-      "id": 101,
-      "question": "What is setTimeOut? 3",
-      "video_id": 1,
-      "options": [
-        {
-          "id": 1,
-          "option": "A function that is called after a certain time",
-          "isCorrect": true
-        },
-        {
-          "id": 2,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 3,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 4,
-          "option": "Option 1",
-          "isCorrect": false
-        }
-      ],
-      "video_title": "Debounce Function in JavaScript - JavaScript Job Interview question"
-    },
-    {
-      "id": 102,
-      "question": "What is setTimeOut?",
-      "video_id": 4,
-      "options": [
-        {
-          "id": 1,
-          "option": "A function that is called after a certain time",
-          "isCorrect": true
-        },
-        {
-          "id": 2,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 3,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 4,
-          "option": "Option 1",
-          "isCorrect": false
-        }
-      ],
-      "video_title": "Phasellus sit amet erat. Nulla tempus. Vivamus in felis eu sapien cursus vestibulum. Proin eu mi. Nulla ac enim. In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem. Duis aliquam convallis nunc."
-    },
-    {
-      "question": "What is setTimeOut?",
-      "video_id": 5,
-      "options": [
-        {
-          "id": 1,
-          "option": "A function that is called after a certain time",
-          "isCorrect": true
-        },
-        {
-          "id": 2,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 3,
-          "option": "Option 1",
-          "isCorrect": false
-        },
-        {
-          "id": 4,
-          "option": "Option 1",
-          "isCorrect": false
-        }
-      ],
-      "video_title": "Donec vitae nisi.",
-      "id": 103
     }
   ],
   "assignmentMark": [
@@ -5824,8 +5740,8 @@
       "title": "Aliquam sit amet diam in magna bibendum imperdiet.",
       "totalMark": 82,
       "createdAt": "2023-04-06T11:28:30.726Z",
-      "status": "pending",
-      "mark": 0,
+      "status": "published",
+      "mark": 10,
       "student_id": 8,
       "student_name": "Fahim Faiasl",
       "id": 102
@@ -5860,8 +5776,8 @@
       "title": "Donec posuere metus vitae ipsum.",
       "totalMark": 22,
       "createdAt": "2023-04-06T11:36:17.471Z",
-      "status": "pending",
-      "mark": 0,
+      "status": "published",
+      "mark": 2000,
       "student_id": 8,
       "student_name": "Fahim Faiasl",
       "id": 105

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { Common, Video } from '../../components';
@@ -29,11 +29,6 @@ function CoursePlayer() {
     const [formData, setFormData] = useState({
         repo_link: '',
     });
-
-    if (currentVideoId) {
-        localStorage.setItem('currentVideoId', currentVideoId);
-        dispatch(videoSelected(currentVideoId));
-    }
 
     const resetForm = () => {
         setFormData({
@@ -176,6 +171,13 @@ function CoursePlayer() {
 
         return null;
     };
+
+    useEffect(() => {
+        if (currentVideoId) {
+            localStorage.setItem('currentVideoId', currentVideoId);
+            dispatch(videoSelected(currentVideoId));
+        }
+    }, [currentVideoId, dispatch]);
 
     return (
         <div className="grid grid-cols-3 gap-2 lg:gap-8">

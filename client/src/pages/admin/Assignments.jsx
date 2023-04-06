@@ -323,6 +323,13 @@ function Assignments() {
         }
     }, [totalCount, videosPage]);
 
+    useEffect(() => {
+        if (addedAssignment || deletedAssignment) {
+            const totalPage = getTotalPageNumber(totalCount);
+            setCurrentPage(totalPage);
+        }
+    }, [addedAssignment, deletedAssignment, totalCount]);
+
     return (
         <div className="px-3 py-10 bg-opacity-10">
             {(error ||
@@ -348,7 +355,9 @@ function Assignments() {
                             ? 'Assignment Added Successfully'
                             : editedAssignment
                             ? 'Assignment Edited Successfully'
-                            : 'Assignment Deleted Successfully'
+                            : deletedAssignment
+                            ? 'Assignment Deleted Successfully'
+                            : ''
                     }
                 />
             )}

@@ -106,10 +106,9 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
                                 'getAssignments',
                                 arg.currentPage,
                                 (draft) => {
-                                    const index = draft.assignments.findIndex(
-                                        (assignment) => assignment.id === deletedAssignment.id
+                                    draft.assignments = draft.assignments.filter(
+                                        (assignment) => assignment.id !== arg.id
                                     );
-                                    draft.assignments.splice(index, 1);
                                 }
                             )
                         );

@@ -160,16 +160,14 @@ export const videosAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: deletedVideo } = await queryFulfilled;
+
                     if (deletedVideo) {
                         await dispatch(
                             videosAPI.util.updateQueryData(
                                 'getMoreVideos',
                                 arg.currentPage,
                                 (draft) => {
-                                    const index = draft.videos.findIndex(
-                                        (v) => v.id === deletedVideo.id
-                                    );
-                                    draft.videos.splice(index, 1);
+                                    draft.videos = draft.videos.filter((v) => v.id !== arg.id);
                                 }
                             )
                         );

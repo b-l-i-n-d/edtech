@@ -201,12 +201,6 @@ function Videos() {
         </form>
     );
 
-    useEffect(() => {
-        if (addedVideo || editedVideo) {
-            setIsModalOpen(false);
-        }
-    }, [addedVideo, editedVideo]);
-
     const videoItems = isLoading ? (
         <Common.Loader />
     ) : (
@@ -231,6 +225,19 @@ function Videos() {
             </tr>
         ))
     );
+
+    useEffect(() => {
+        if (addedVideo || editedVideo) {
+            setIsModalOpen(false);
+        }
+    }, [addedVideo, editedVideo]);
+
+    useEffect(() => {
+        if (addedVideo || deletedVideo) {
+            const totalPage = getTotalPageNumber(totalCount);
+            setCurrentPage(totalPage);
+        }
+    }, [addedVideo, deletedVideo, totalCount]);
 
     return (
         <div className="px-3 py-10 bg-opacity-10">
@@ -266,7 +273,7 @@ function Videos() {
                     Add Video
                 </button>
             </div>
-            {videos?.length > 0 ? (
+            {videoItems?.length > 0 ? (
                 <div className="overflow-x-auto mt-4">
                     <table className="divide-y-1 text-base divide-gray-600 w-full">
                         <thead>

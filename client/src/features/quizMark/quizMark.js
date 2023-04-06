@@ -27,6 +27,11 @@ export const quizMarkAPI = apiSlice.injectEndpoints({
                                 quizMark
                             )
                         );
+                        await dispatch(
+                            quizMarkAPI.util.updateQueryData('getQuizMarks', undefined, (draft) => {
+                                draft.push(quizMark);
+                            })
+                        );
                     }
                 } catch (error) {
                     // do nothing

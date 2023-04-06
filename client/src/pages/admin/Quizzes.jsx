@@ -322,6 +322,13 @@ function Quizzes() {
     }, [addedQuiz, editedQuiz]);
 
     useEffect(() => {
+        if (addedQuiz || deletedQuiz) {
+            const totalPage = getTotalPageNumber(totalCount);
+            setCurrentPage(totalPage);
+        }
+    }, [addedQuiz, deletedQuiz, totalCount]);
+
+    useEffect(() => {
         if (videosPage > 1) {
             dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
         }
