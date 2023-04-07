@@ -13,6 +13,7 @@ function VideoList() {
 
     const { videos, totalCount } = data || {};
 
+    // fetch more data
     const fetchMoreData = () => {
         if (videos.length >= totalCount) {
             setHasMore(false);
@@ -21,18 +22,21 @@ function VideoList() {
         setPage((prevPage) => prevPage + 1);
     };
 
+    // generating video list
     const videoList = isLoading ? (
         <Common.Loader />
     ) : (
         videos?.map((video) => <VideoCard key={video.id} video={video} />)
     );
 
+    // fetch more videos if page > 1
     useEffect(() => {
         if (page > 1) {
             dispatch(videosAPI.endpoints.getMoreVideos.initiate(page));
         }
     }, [page, dispatch]);
 
+    // check if there are more videos to fetch
     useEffect(() => {
         if (totalCount > 0) {
             const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > page;

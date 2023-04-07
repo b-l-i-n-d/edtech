@@ -6,11 +6,12 @@ import { useGetUsersQuery } from '../../features/users/usersAPI';
 import { generateLeaderboard } from '../../utils';
 
 function Leaderboard() {
-    const currentUser = useSelector((state) => state.auth.user);
+    const currentUser = useSelector((state) => state.auth.user); // Get current user from redux store
     const { data: users } = useGetUsersQuery();
     const { data: quizMarks } = useGetQuizMarksQuery();
     const { data: assignmentMarks } = useGetAllAssignmentMarksQuery();
 
+    // Generate leaderboard
     const generatedLeaderboard = useMemo(
         () =>
             users &&
@@ -20,6 +21,7 @@ function Leaderboard() {
         [assignmentMarks, quizMarks, users]
     );
 
+    // leaderboard rows
     const leaderboardRows = generatedLeaderboard?.map((user) => (
         <tr key={user.id} className="border-b border-slate-600/50">
             <td className="table-td text-center">{user.rank}</td>
@@ -30,8 +32,10 @@ function Leaderboard() {
         </tr>
     ));
 
+    // Current user position in leaderboard
     const currentUserPosition = generatedLeaderboard?.find((user) => user.id === currentUser.id);
 
+    // Current user row in leaderboard table
     const currentUserRow = currentUserPosition && (
         <tr className="border-2 border-cyan">
             <td className="table-td text-center font-bold">{currentUserPosition.rank}</td>
@@ -46,6 +50,7 @@ function Leaderboard() {
 
     return (
         <>
+            {/* Current user row */}
             <div>
                 <h3 className="text-lg font-bold">Your Position in Leaderboard</h3>
                 <table className="text-base w-full border border-slate-600/50 rounded-md my-4">
@@ -63,6 +68,7 @@ function Leaderboard() {
                 </table>
             </div>
 
+            {/* Leaderboard table */}
             <div className="my-8">
                 <h3 className="text-lg font-bold">Top 20 Result</h3>
                 <table className="text-base w-full border border-slate-600/50 rounded-md my-4">

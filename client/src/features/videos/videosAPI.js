@@ -3,6 +3,7 @@ import { videoSelected } from './videosSlice';
 
 export const videosAPI = apiSlice.injectEndpoints({
     endpoints: (build) => ({
+        // get videos of 1st page
         getVideos: build.query({
             query: () => ({
                 url: `/videos?_page=1&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
@@ -23,6 +24,7 @@ export const videosAPI = apiSlice.injectEndpoints({
                     const { videos } = videosData;
                     const currentVideoId = localStorage?.getItem('currentVideoId');
 
+                    // select first video if no video is selected
                     if (currentVideoId) {
                         dispatch(videoSelected(currentVideoId));
                     } else if (!currentVideoId && videos.length > 0) {
@@ -35,6 +37,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get all videos
         getAllVideos: build.query({
             query: () => ({
                 url: '/videos',
@@ -42,6 +45,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             }),
         }),
 
+        // get videos by page
         getMoreVideos: build.query({
             query: (page) => ({
                 url: `/videos?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
@@ -60,6 +64,8 @@ export const videosAPI = apiSlice.injectEndpoints({
                 try {
                     const { data: moreVideosData } = await queryFulfilled;
                     const { videos: moreVideos } = moreVideosData;
+
+                    // update with new videos in videos
                     if (moreVideos.length > 0) {
                         await dispatch(
                             videosAPI.util.updateQueryData('getVideos', undefined, (draft) => ({
@@ -74,6 +80,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get video by id
         getVideo: build.query({
             query: (id) => ({
                 url: `/videos/${id}`,
@@ -81,6 +88,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             }),
         }),
 
+        // create video
         addVideo: build.mutation({
             query: (data) => ({
                 url: '/videos',
@@ -123,6 +131,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // update video
         editVideo: build.mutation({
             query: ({ id, data }) => ({
                 url: `/videos/${id}`,
@@ -152,6 +161,7 @@ export const videosAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // delete video
         deleteVideo: build.mutation({
             query: ({ id }) => ({
                 url: `/videos/${id}`,
@@ -161,6 +171,7 @@ export const videosAPI = apiSlice.injectEndpoints({
                 try {
                     const { data: deletedVideo } = await queryFulfilled;
 
+                    // delete video from videos
                     if (deletedVideo) {
                         await dispatch(
                             videosAPI.util.updateQueryData(
@@ -171,6 +182,8 @@ export const videosAPI = apiSlice.injectEndpoints({
                                 }
                             )
                         );
+
+                        // update total count
                         for (let i = 1; i <= arg.totalPage; i += 1) {
                             dispatch(
                                 videosAPI.util.updateQueryData('getMoreVideos', i, (draft) => ({

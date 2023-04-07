@@ -11,10 +11,10 @@ import { useGetQuizzesByVideoIdQuery } from '../../features/quizzes/quizzesAPI';
 import { useGetVideoQuery } from '../../features/videos/videosAPI';
 
 function Quizzes() {
-    const { currentVideoId } = useParams();
+    const { currentVideoId } = useParams(); // currentVideoId from url
     const navigate = useNavigate();
-    const [selectedOption, setSelectedOption] = useState([]);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [selectedOption, setSelectedOption] = useState([]); // selected option for each quiz
+    const [isSubmitted, setIsSubmitted] = useState(false); // check if user has submitted the quiz
     const [result, setResult] = useState({
         mark: 0,
         totalMark: 0,
@@ -30,6 +30,7 @@ function Quizzes() {
     const { data: quizMark, isLoading: isGetQuizMarkLoading } =
         useGetQuizMarkByVideoIdQuery(currentVideoId);
 
+    // correct answer for each quiz
     const correctAnswer =
         !isGetQuizLoading &&
         quizzes?.map((quiz) => {
@@ -41,7 +42,10 @@ function Quizzes() {
             return { quizId, optionId };
         });
 
+    // quiz count
     let quizCount = 0;
+
+    // quiz list
     const quizList =
         !isGetQuizLoading &&
         !isGetQuizMarkLoading &&
@@ -56,6 +60,7 @@ function Quizzes() {
             />
         ));
 
+    // handle submit
     const handleSubmit = () => {
         let correctCount = 0;
         correctAnswer.forEach((correct) => {
@@ -86,6 +91,7 @@ function Quizzes() {
         navigate('/leaderboard');
     };
 
+    // check if user has submitted the quiz
     useEffect(() => {
         if (!isAddQuizMarkLoading && addedQuizMark) {
             setIsSubmitted(true);
@@ -111,6 +117,7 @@ function Quizzes() {
                 <h1 className="text-2xl font-bold">Quizzes for &quot;{video?.title}&quot;</h1>
                 <p className="text-sm text-slate-200">Each question contains 5 Mark</p>
 
+                {/* show score after submit */}
                 {isSubmitted && (
                     <div className="mt-4">
                         <span className="text-lg text-slate-200">Your Mark: </span>
@@ -125,10 +132,13 @@ function Quizzes() {
                 )}
             </div>
 
+            {/* show quiz list */}
             <div className="space-y-8 ">{quizList}</div>
 
+            {/* show error */}
             {error && <Common.Error error={error} />}
 
+            {/* show submit button */}
             <button
                 type="button"
                 className={`px-4 py-2 rounded-full block ml-auto mt-8 border border-cyan bg-blue-500   ${

@@ -3,6 +3,7 @@ import { userLoggedIn } from './authSlice';
 
 export const authAPI = apiSlice.injectEndpoints({
     endpoints: (build) => ({
+        // login
         login: build.mutation({
             query: (data) => ({
                 url: '/login',
@@ -15,6 +16,7 @@ export const authAPI = apiSlice.injectEndpoints({
                     const { data } = await queryFulfilled;
                     const { accessToken, user } = data;
 
+                    // save to localStorage
                     localStorage.setItem(
                         'auth',
                         JSON.stringify({
@@ -29,6 +31,8 @@ export const authAPI = apiSlice.injectEndpoints({
                 }
             },
         }),
+
+        // create new user
         register: build.mutation({
             query: (data) => ({
                 url: '/register',
@@ -44,6 +48,7 @@ export const authAPI = apiSlice.injectEndpoints({
                     const { data } = await queryFulfilled;
                     const { accessToken, user } = data;
 
+                    // save to local storage
                     localStorage.setItem(
                         'auth',
                         JSON.stringify({

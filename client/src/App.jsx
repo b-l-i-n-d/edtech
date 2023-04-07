@@ -10,9 +10,13 @@ function App() {
 
     return (
         <Routes>
+            {/* PersistLogin: check if user has logged in */}
             <Route element={<Auth.PersistLogin />}>
+                {/* RequiredLogin: check if user has logged in */}
                 <Route element={<Auth.RequiredLogin />}>
+                    {/* Layout: layout for all pages */}
                     <Route element={<Layout />}>
+                        {/* StudentOnly: check if user is a student */}
                         <Route element={<Auth.StudentOnly />}>
                             <Route
                                 path="/"
@@ -28,6 +32,7 @@ function App() {
                             </Route>
                             <Route path="/leaderboard" element={<Student.Leaderboard />} />
                         </Route>
+                        {/* AdminOnly: check if user is an admin */}
                         <Route element={<Auth.AdminOnly />}>
                             <Route path="/admin">
                                 <Route index element={<Admin.Dashboard />} />
@@ -40,9 +45,11 @@ function App() {
                                 />
                             </Route>
                         </Route>
+                        {/* Not listed in route */}
                         <Route path="*" element={<Navigate to="/" />} />
                     </Route>
                 </Route>
+                {/* NotRequiredLogin: check if user has not logged in */}
                 <Route element={<Auth.NotRequiredLogin />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin/login" element={<Login />} />

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useTitle } from '../../hooks';
 
 function Dashboard() {
+    // Set the page title
     useTitle('Dashboard');
 
     return (
         <div className="px-3 md:lg:xl:px-40  py-20 bg-opacity-10">
             <div className="grid grid-cols-1 md:grid-cols-2  gap-6 p-8">
+                {/* Videos */}
                 <Link to="videos" className="dashboard-item-card">
                     <svg
                         fill="none"
@@ -25,6 +27,7 @@ function Dashboard() {
                     <p className="text-slate-200 mt-3 ">Videos</p>
                 </Link>
 
+                {/* Assignments */}
                 <Link to="assignments" className="dashboard-item-card">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -44,6 +47,7 @@ function Dashboard() {
                     <p className="text-slate-200 mt-3">Assignment</p>
                 </Link>
 
+                {/* Quizzes */}
                 <Link to="quizzes" className="dashboard-item-card">
                     <svg
                         fill="none"
@@ -61,6 +65,7 @@ function Dashboard() {
                     <p className="text-slate-200 mt-3 ">Quizzes</p>
                 </Link>
 
+                {/* Assignment Marks */}
                 <Link to="assignment-marks" className="dashboard-item-card">
                     <svg
                         viewBox="0 0 24 24"

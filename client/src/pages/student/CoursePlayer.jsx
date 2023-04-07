@@ -14,6 +14,7 @@ import { useGetVideoQuery } from '../../features/videos/videosAPI';
 import { videoSelected } from '../../features/videos/videosSlice';
 
 function CoursePlayer() {
+    // get video id from url
     const { currentVideoId } = useParams();
     const dispatch = useDispatch();
     const { data: video, isLoading: isGetVideoLoading, error } = useGetVideoQuery(currentVideoId);
@@ -24,27 +25,31 @@ function CoursePlayer() {
     const { data: quiz, isLoading: isGetQuizLoading } = useGetQuizzesByVideoIdQuery(currentVideoId);
     const [addAssignmentMark, { isLoading: isAddAssignmentMarkLoading }] =
         useAddAssignmentMarkMutation();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [title, setTitle] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false); // modal state
+    const [title, setTitle] = useState(''); // modal title
     const [formData, setFormData] = useState({
         repo_link: '',
     });
 
+    // reset form data
     const resetForm = () => {
         setFormData({
             repo_link: '',
         });
     };
 
+    // handle modal close
     const onClose = () => {
         setIsModalOpen(false);
         resetForm();
     };
 
+    //  handle form data change
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsModalOpen(false);
@@ -56,18 +61,21 @@ function CoursePlayer() {
         });
     };
 
+    // handle add assignment mark modal
     const handleAddModal = () => {
         setIsModalOpen(true);
         setTitle(assignment.title);
         resetForm();
     };
 
+    // handle show assignment mark modal
     const handleShowModal = () => {
         setIsModalOpen(true);
         setTitle(assignment.title);
         resetForm();
     };
 
+    // assignment mark form
     const assignmentMarkForm = (
         <form id="modalForm" className="space-y-6" onSubmit={handleSubmit}>
             <label htmlFor="email" className="block mb-2 text-sm text-white">
@@ -87,6 +95,7 @@ function CoursePlayer() {
         </form>
     );
 
+    // assignment mark modal
     const showModal = (
         <div className="relative overflow-x-auto shadow-md">
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -108,6 +117,7 @@ function CoursePlayer() {
         </div>
     );
 
+    // assignment button condition
     const assignmentBtn = () => {
         if (!assignmentMark && assignment) {
             return (
@@ -147,6 +157,7 @@ function CoursePlayer() {
         return null;
     };
 
+    // quiz button condition
     const quizBtn = () => {
         if (!isGetQuizMarkLoading && quizMark) {
             return (
@@ -172,6 +183,7 @@ function CoursePlayer() {
         return null;
     };
 
+    // set current video id to local storage and redux store
     useEffect(() => {
         if (currentVideoId) {
             localStorage.setItem('currentVideoId', currentVideoId);
@@ -186,6 +198,7 @@ function CoursePlayer() {
                     <Common.Loader />
                 ) : (
                     <>
+                        {/* video iframe */}
                         <iframe
                             width="100%"
                             className="aspect-video"
@@ -196,6 +209,7 @@ function CoursePlayer() {
                             allowFullScreen
                         />
 
+                        {/* video details */}
                         <div>
                             <h1 className="text-lg font-semibold tracking-tight text-slate-100">
                                 {video?.title}
@@ -204,11 +218,14 @@ function CoursePlayer() {
                                 Uploaded on {new Date(video?.createdAt).toDateString()}
                             </h2>
 
+                            {/* assignments btn and quiz button */}
                             <div className="flex gap-4">
                                 {assignmentBtn()}
 
                                 {quizBtn()}
                             </div>
+
+                            {/* if quizmark exists show quiz mark */}
                             {quizMark && (
                                 <div className="max-w-xs p-6 border rounded-lg shadow bg-gray-800 border-gray-700 mt-4">
                                     <h5 className="mb-2 text-md font-bold tracking-tight text-gray-900 dark:text-white">
@@ -253,11 +270,17 @@ function CoursePlayer() {
                                 {video?.description}
                             </p>
                         </div>
+
+                        {/* error message */}
                         {error && <Common.Error message={error.data} />}
                     </>
                 )}
             </div>
+
+            {/* video list */}
             <Video.VideoList />
+
+            {/* modal */}
             <Common.Modal
                 title={title}
                 open={isModalOpen}

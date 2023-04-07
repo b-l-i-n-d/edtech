@@ -17,17 +17,18 @@ import {
     useLazyGetAllVideosQuery,
     videosAPI,
 } from '../../features/videos/videosAPI';
-import { getTotalPageNumber } from '../../utils';
 import { useTitle } from '../../hooks';
+import { getTotalPageNumber } from '../../utils';
 
 function Quizzes() {
+    // set page title
     useTitle('Quizzes');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [videosPage, setVideosPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [title, setTitle] = useState('Add Quiz');
-    const [isEdit, setIsEdit] = useState(undefined);
+    const [currentPage, setCurrentPage] = useState(1); // current page for quizzes
+    const [videosPage, setVideosPage] = useState(1); // current page for videos
+    const [hasMore, setHasMore] = useState(true); // has more videos to fetch
+    const [isModalOpen, setIsModalOpen] = useState(false); // is modal open
+    const [title, setTitle] = useState('Add Quiz'); // modal title
+    const [isEdit, setIsEdit] = useState(undefined); // is edit mode
     const [formData, setFormData] = useState({
         question: '',
         video_id: '',
@@ -82,6 +83,7 @@ function Quizzes() {
         </svg>
     );
 
+    // reset form data
     const resetForm = () => {
         setFormData({
             question: '',
@@ -95,11 +97,13 @@ function Quizzes() {
         });
     };
 
+    // handle modal close
     const onClose = () => {
         setIsModalOpen(false);
         resetForm();
     };
 
+    // fetch more videos
     const fetchMoreData = () => {
         if (videos.length >= totalVideosCount) {
             setHasMore(false);
@@ -108,15 +112,18 @@ function Quizzes() {
         setVideosPage((prevPage) => prevPage + 1);
     };
 
+    // handle pagination change
     const onPaginationChange = (page) => {
         setCurrentPage(page);
     };
 
+    // handle form change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: name === 'video_id' ? Number(value) : value }));
     };
 
+    // handle option change
     const handleOptionChange = (e, index) => {
         const { name, value } = e.target;
         const options = [...formData.options];
@@ -124,6 +131,7 @@ function Quizzes() {
         setFormData((prev) => ({ ...prev, options }));
     };
 
+    // handle option checkbox
     const handleOptionCheckbox = (e, index) => {
         const { checked } = e.target;
         const options = [...formData.options];
@@ -131,6 +139,7 @@ function Quizzes() {
         setFormData((prev) => ({ ...prev, options }));
     };
 
+    // handle add quiz modal
     const handleAddModal = () => {
         setTitle('Add Quiz');
         resetForm();
@@ -138,6 +147,7 @@ function Quizzes() {
         setIsEdit(undefined);
     };
 
+    // handle edit quiz modal
     const handleEditModal = (quiz) => {
         setTitle('Edit Quiz');
         setFormData({
@@ -151,6 +161,7 @@ function Quizzes() {
         getAllVideos();
     };
 
+    // handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         const totalPage = getTotalPageNumber(totalCount);
@@ -169,6 +180,7 @@ function Quizzes() {
         resetForm();
     };
 
+    // handle delete quiz
     const handleDelete = (id) => {
         const totalPage = getTotalPageNumber(totalCount);
         deleteQuiz({
@@ -178,16 +190,19 @@ function Quizzes() {
         });
     };
 
+    // select video options
     const selectVideoOptions = videos?.map((video) => ({
         value: video.id,
         label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
+    // all videos options
     const allVideosSelectOptions = allVideosData?.map((video) => ({
         value: video.id,
         label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
+    // load options for select video
     const loadOptions = async () => {
         const transformedOptions = selectVideoOptions;
         const more = hasMore;
@@ -200,6 +215,8 @@ function Quizzes() {
         };
     };
 
+    // select video component
+    // Infinite scroll for adding quiz
     const selectVideo = !isEdit ? (
         <AsyncPaginate
             form="modalForm"
@@ -239,6 +256,7 @@ function Quizzes() {
         />
     );
 
+    // quiz form
     const quizForm = (
         <form id="modalForm" onSubmit={handleSubmit}>
             <div className="flex flex-col">
@@ -289,6 +307,7 @@ function Quizzes() {
         </form>
     );
 
+    // quiz table
     const quizItems = isLoading ? (
         <Common.Loader />
     ) : (
@@ -316,6 +335,7 @@ function Quizzes() {
         ))
     );
 
+    // close modal on add or edit quiz success
     useEffect(() => {
         if (addedQuiz || editedQuiz) {
             onClose();
@@ -323,19 +343,22 @@ function Quizzes() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [addedQuiz, editedQuiz]);
 
+    // set current page to last page on add quiz
     useEffect(() => {
-        if (addedQuiz || deletedQuiz) {
+        if (addedQuiz) {
             const totalPage = getTotalPageNumber(totalCount);
             setCurrentPage(totalPage);
         }
-    }, [addedQuiz, deletedQuiz, totalCount]);
+    }, [addedQuiz, totalCount]);
 
+    // add more quizzes on scroll
     useEffect(() => {
         if (videosPage > 1) {
             dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
         }
     }, [videosPage, dispatch]);
 
+    // set hasMore to trthy if there are more quizzes
     useEffect(() => {
         if (totalCount > 0) {
             const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > videosPage;
@@ -343,8 +366,21 @@ function Quizzes() {
         }
     }, [videosPage, totalCount]);
 
+    // if there are no quizzes in current page, set current page to previous page
+    useEffect(() => {
+        if (deletedQuiz) {
+            const quizzesLengthInCurrentPage = quizzes?.length;
+            if (quizzesLengthInCurrentPage === 0) {
+                setCurrentPage((prevCurrentPage) =>
+                    prevCurrentPage > 1 ? prevCurrentPage - 1 : 1
+                );
+            }
+        }
+    }, [quizzes?.length, deletedQuiz]);
+
     return (
         <div className="px-3 py-10 bg-opacity-10">
+            {/* Error and Success */}
             {(error || deleteQuizError || addQuizError || editQuizError) && (
                 <Common.Error error={error || deleteQuizError || addQuizError || editQuizError} />
             )}
@@ -360,6 +396,7 @@ function Quizzes() {
                 />
             )}
 
+            {/* Add Quiz Modal */}
             <div className="w-full flex">
                 <button
                     type="button"
@@ -369,6 +406,8 @@ function Quizzes() {
                     Add Quiz
                 </button>
             </div>
+
+            {/* Table */}
             {quizItems?.length > 0 ? (
                 <div className="overflow-x-auto mt-4">
                     <table className="divide-y-1 text-base divide-gray-600 w-full">
@@ -387,6 +426,7 @@ function Quizzes() {
                 <Common.Info info="No Quizzes Found" />
             )}
 
+            {/* Pagination */}
             <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
                 <Pagination
                     showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
@@ -395,6 +435,8 @@ function Quizzes() {
                     onChange={onPaginationChange}
                 />
             </div>
+
+            {/* Modal */}
             <Common.Modal
                 title={title}
                 open={isModalOpen}

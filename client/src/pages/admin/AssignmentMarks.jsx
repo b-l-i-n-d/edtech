@@ -9,8 +9,9 @@ import {
 import { useTitle } from '../../hooks';
 
 function AssignmentMarks() {
+    // useTitle is a custom hook to set the title of the page
     useTitle('Assignment Marks');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1); // current page
     const [formData, setFormData] = useState({
         mark: '',
     });
@@ -33,6 +34,7 @@ function AssignmentMarks() {
         setCurrentPage(page);
     };
 
+    // submit button icon
     const submitBtn = (
         <svg
             fill="none"
@@ -45,10 +47,12 @@ function AssignmentMarks() {
         </svg>
     );
 
+    // handle change in input fields
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: Number(e.target.value) });
     };
 
+    // handle edit assignment mark
     const handleEditAssignmentMark = (e) => {
         e.preventDefault();
         editAssignmentMark({
@@ -60,6 +64,7 @@ function AssignmentMarks() {
         });
     };
 
+    // assignment mark form
     const assignmentMarkForm = (id) => (
         <form
             id={id}
@@ -83,6 +88,7 @@ function AssignmentMarks() {
         </form>
     );
 
+    // assignment mark list table
     const assignmentMarkList = isLoading ? (
         <Common.Loader />
     ) : (
@@ -111,11 +117,13 @@ function AssignmentMarks() {
 
     return (
         <div className="px-3 py-10 bg-opacity-10">
+            {/* Error and Success */}
             {(error || editAssignmentMarkError) && (
                 <Common.Error error={error || editAssignmentMarkError} />
             )}
             {edittedAssignmentMark && <Common.Success message="Assignment Mark Updated" />}
 
+            {/* Header */}
             <ul className="assignment-status">
                 <li>
                     Total <span>{totalCount}</span>
@@ -127,6 +135,8 @@ function AssignmentMarks() {
                     Mark Sent <span>{totalCount && pendingMarks && totalCount - pendingMarks}</span>
                 </li>
             </ul>
+
+            {/* Table */}
             {assignmentMarkList?.length > 0 ? (
                 <div className="overflow-x-auto mt-4">
                     <table className="divide-y-1 text-base divide-gray-600 w-full">
@@ -147,6 +157,7 @@ function AssignmentMarks() {
                 <Common.Info info="No Assignment Marks Found" />
             )}
 
+            {/* Pagination */}
             <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
                 <Pagination
                     showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}

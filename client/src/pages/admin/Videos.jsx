@@ -10,14 +10,15 @@ import {
     useEditVideoMutation,
     useGetMoreVideosQuery,
 } from '../../features/videos/videosAPI';
-import { getTotalPageNumber } from '../../utils';
 import { useTitle } from '../../hooks';
+import { getTotalPageNumber } from '../../utils';
 
 function Videos() {
+    // useTitle is a custom hook to set the title of the page
     useTitle('Videos');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [title, setTitle] = useState('Add Video');
-    const [isEdit, setIsEdit] = useState(undefined);
+    const [isModalOpen, setIsModalOpen] = useState(false); // state to control the modal
+    const [title, setTitle] = useState('Add Video'); // state to control the title of the modal
+    const [isEdit, setIsEdit] = useState(undefined); // state to control the edit mode of the modal
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -25,7 +26,7 @@ function Videos() {
         duration: '',
         views: '',
     });
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1); // current page of the pagination
     const { data, isLoading, error } = useGetMoreVideosQuery(currentPage);
     const [addVideo, { data: addedVideo, isLoading: isAddedVideoLoading, error: addVideoError }] =
         useAddVideoMutation();
@@ -67,24 +68,29 @@ function Videos() {
         </svg>
     );
 
+    // handle modal close
     const onClose = () => {
         setIsModalOpen(false);
     };
 
+    // handle pagination change
     const onPaginationChange = (page) => {
         setCurrentPage(page);
     };
 
+    // handle form change
     const handleChange = (e) => {
         setFormData((prevFormData) => ({ ...prevFormData, [e.target.name]: e.target.value }));
     };
 
+    // handle add Modal open
     const handleAddModal = () => {
         setIsModalOpen(true);
         setTitle('Add Video');
         setIsEdit(undefined);
     };
 
+    // handle edit Modal open
     const handleEditModal = (video) => {
         setIsModalOpen(true);
         setTitle('Edit Video');
@@ -98,6 +104,7 @@ function Videos() {
         setIsEdit(video.id);
     };
 
+    // handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isEdit) {
@@ -118,11 +125,13 @@ function Videos() {
         });
     };
 
+    // handle delete video
     const handleDelete = (id) => {
         const totalPage = getTotalPageNumber(totalCount);
         deleteVideo({ id, currentPage, totalPage });
     };
 
+    // video form for add and edit
     const videoForm = (
         <form id="modalForm" className="space-y-6" onSubmit={handleSubmit}>
             <div>
@@ -203,6 +212,7 @@ function Videos() {
         </form>
     );
 
+    // video table
     const videoItems = isLoading ? (
         <Common.Loader />
     ) : (
@@ -228,21 +238,36 @@ function Videos() {
         ))
     );
 
+    // handle modal close on add or edit video success
     useEffect(() => {
         if (addedVideo || editedVideo) {
             setIsModalOpen(false);
         }
     }, [addedVideo, editedVideo]);
 
+    // go to last page on add video
     useEffect(() => {
-        if (addedVideo || deletedVideo) {
+        if (addedVideo) {
             const totalPage = getTotalPageNumber(totalCount);
             setCurrentPage(totalPage);
         }
     }, [addedVideo, deletedVideo, totalCount]);
 
+    // if current page is empty after delete video then go to previous page
+    useEffect(() => {
+        if (deletedVideo) {
+            const videosLengthInCurrentPage = videos?.length;
+            if (videosLengthInCurrentPage === 0) {
+                setCurrentPage((prevCurrentPage) =>
+                    prevCurrentPage > 1 ? prevCurrentPage - 1 : 1
+                );
+            }
+        }
+    }, [videos?.length, deletedVideo]);
+
     return (
         <div className="px-3 py-10 bg-opacity-10">
+            {/* Error and Success */}
             {(error || addVideoError || editVideoError || deleteVideoError) && (
                 <Common.Error
                     error={
@@ -266,6 +291,8 @@ function Videos() {
                     }
                 />
             )}
+
+            {/* Add Video Button */}
             <div className="w-full flex">
                 <button
                     type="button"
@@ -275,6 +302,8 @@ function Videos() {
                     Add Video
                 </button>
             </div>
+
+            {/* Table */}
             {videoItems?.length > 0 ? (
                 <div className="overflow-x-auto mt-4">
                     <table className="divide-y-1 text-base divide-gray-600 w-full">
@@ -293,6 +322,7 @@ function Videos() {
                 <Common.Info info="No videos found" />
             )}
 
+            {/* Pagination */}
             <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
                 <Pagination
                     showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
@@ -301,6 +331,7 @@ function Videos() {
                     onChange={onPaginationChange}
                 />
             </div>
+            {/* Modal */}
             <Common.Modal
                 title={title}
                 open={isModalOpen}

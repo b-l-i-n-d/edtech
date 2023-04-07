@@ -9,6 +9,7 @@ function Layout() {
 
             <section className="py-6 bg-primary pt-20">
                 <div className="mx-auto max-w-7xl px-5 lg:px-0">
+                    {/* Outlet is a placeholder for the content of the page */}
                     <Outlet />
                 </div>
             </section>

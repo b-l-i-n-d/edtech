@@ -2,6 +2,7 @@ import { apiSlice } from '../api/apiSlice';
 
 export const quizzesAPI = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        // get quizzes by video id
         getQuizzesByVideoId: builder.query({
             query: (id) => `/quizzes?video_id=${id}`,
             transformResponse: (response) => {
@@ -12,6 +13,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get quizzes by page
         getQuizzes: builder.query({
             query: (page) => `/quizzes?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
 
@@ -24,6 +26,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // create new quiz
         addQuiz: builder.mutation({
             query: (data) => ({
                 url: '/quizzes',
@@ -33,7 +36,9 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: addedQuiz } = await queryFulfilled;
+
                     if (addedQuiz) {
+                        // update with new quiz in quizzes
                         await dispatch(
                             quizzesAPI.util.updateQueryData(
                                 'getQuizzes',
@@ -47,6 +52,8 @@ export const quizzesAPI = apiSlice.injectEndpoints({
                                 })
                             )
                         );
+
+                        // update total count
                         for (let i = 1; i <= arg.totalPage; i += 1) {
                             dispatch(
                                 quizzesAPI.util.updateQueryData('getQuizzes', i, (draft) => ({
@@ -62,6 +69,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // update quiz
         editQuiz: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/quizzes/${id}`,
@@ -71,6 +79,8 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedQuiz } = await queryFulfilled;
+
+                    // update with edited quiz in quizzes
                     if (updatedQuiz) {
                         await dispatch(
                             quizzesAPI.util.updateQueryData(
@@ -91,6 +101,7 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // delete quiz
         deleteQuiz: builder.mutation({
             query: ({ id }) => ({
                 url: `/quizzes/${id}`,
@@ -99,11 +110,15 @@ export const quizzesAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
+
+                    // remove deleted quiz from quizzes
                     await dispatch(
                         quizzesAPI.util.updateQueryData('getQuizzes', arg.currentPage, (draft) => {
                             draft.quizzes = draft.quizzes.filter((quiz) => quiz.id !== arg.id);
                         })
                     );
+
+                    // update total count
                     for (let i = 1; i <= arg.totalPage; i += 1) {
                         dispatch(
                             quizzesAPI.util.updateQueryData('getQuizzes', i, (draft) => ({

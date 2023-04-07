@@ -2,11 +2,13 @@ import { apiSlice } from '../api/apiSlice';
 
 export const assignmentsAPI = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        // get assignment by video id
         getAssignmentsByVideoId: builder.query({
             query: (id) => `/assignments?video_id=${id}`,
             transformResponse: (response) => response[0],
         }),
 
+        // get assignments by page
         getAssignments: builder.query({
             query: (page) =>
                 `/assignments?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
@@ -20,6 +22,7 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // create new assignment
         addAssignment: builder.mutation({
             query: (data) => ({
                 url: '/assignments',
@@ -29,6 +32,8 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: addedAssignment } = await queryFulfilled;
+
+                    // update with new assignment in assignments
                     if (addedAssignment) {
                         await dispatch(
                             assignmentsAPI.util.updateQueryData(
@@ -44,6 +49,8 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
                                 })
                             )
                         );
+
+                        // update total count
                         for (let i = 1; i <= arg.totalPage; i += 1) {
                             dispatch(
                                 assignmentsAPI.util.updateQueryData(
@@ -63,6 +70,7 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // update assignment
         editAssignment: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/assignments/${id}`,
@@ -72,6 +80,8 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedAssignment } = await queryFulfilled;
+
+                    // update with new assignment in assignments
                     if (updatedAssignment) {
                         dispatch(
                             assignmentsAPI.util.updateQueryData(
@@ -92,6 +102,7 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // delete assignment
         deleteAssignment: builder.mutation({
             query: ({ id }) => ({
                 url: `/assignments/${id}`,
@@ -100,6 +111,8 @@ export const assignmentsAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: deletedAssignment } = await queryFulfilled;
+
+                    // remove deleted assignment from assignments
                     if (deletedAssignment) {
                         dispatch(
                             assignmentsAPI.util.updateQueryData(

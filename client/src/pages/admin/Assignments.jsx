@@ -17,17 +17,18 @@ import {
     useLazyGetAllVideosQuery,
     videosAPI,
 } from '../../features/videos/videosAPI';
-import { getTotalPageNumber } from '../../utils';
 import { useTitle } from '../../hooks';
+import { getTotalPageNumber } from '../../utils';
 
 function Assignments() {
+    // useTitle is a custom hook to set the title of the page
     useTitle('Assignments');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [videosPage, setVideosPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [title, setTitle] = useState('Add Assignment');
-    const [isEdit, setIsEdit] = useState(undefined);
+    const [currentPage, setCurrentPage] = useState(1); // current page of assignments
+    const [videosPage, setVideosPage] = useState(1); // current page of videos
+    const [hasMore, setHasMore] = useState(true); // check if there are more videos to load
+    const [isModalOpen, setIsModalOpen] = useState(false); // check if modal is open
+    const [title, setTitle] = useState('Add Assignment'); // title of the modal
+    const [isEdit, setIsEdit] = useState(undefined); // check if the modal is for editing
     const [formData, setFormData] = useState({
         title: '',
         video_id: '',
@@ -90,6 +91,7 @@ function Assignments() {
         </svg>
     );
 
+    // reset form data
     const resetForm = () => {
         setFormData({
             title: '',
@@ -99,11 +101,13 @@ function Assignments() {
         });
     };
 
+    // handle modal close
     const onClose = () => {
         setIsModalOpen(false);
         resetForm();
     };
 
+    // fetch more videos
     const fetchMoreData = () => {
         if (videos.length >= totalVideosCount) {
             setHasMore(false);
@@ -112,10 +116,12 @@ function Assignments() {
         setVideosPage((prevPage) => prevPage + 1);
     };
 
+    // fetch new assignments for the current page
     const onPaginationChange = (page) => {
         setCurrentPage(page);
     };
 
+    // handle form data change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevFormData) => ({
@@ -124,6 +130,7 @@ function Assignments() {
         }));
     };
 
+    // handle add modal
     const handleAddModal = () => {
         resetForm();
         setIsModalOpen(true);
@@ -131,6 +138,7 @@ function Assignments() {
         setIsEdit(undefined);
     };
 
+    // handle edit modal
     const handleEditModal = (assignment) => {
         setIsModalOpen(true);
         setTitle('Edit Assignment');
@@ -144,6 +152,7 @@ function Assignments() {
         getAllVideos();
     };
 
+    // handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isEdit) {
@@ -162,6 +171,7 @@ function Assignments() {
         resetForm();
     };
 
+    // handle delete assignment
     const handleDelete = (id) => {
         const totalPage = getTotalPageNumber(totalCount);
         deleteAssignment({
@@ -171,6 +181,8 @@ function Assignments() {
         });
     };
 
+    // filter videos that are not assigned to any assignment
+    // when editing an assignment it includes the video that is being edited
     const filteredVideos =
         (!isVideoLoading &&
             videos?.filter(
@@ -181,16 +193,19 @@ function Assignments() {
             )) ||
         [];
 
+    // select options for videos
     const selectVideoOptions = filteredVideos?.map((video) => ({
         value: video.id,
         label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
+    // select options for all videos
     const allVideosSelectOptions = allVideosData?.map((video) => ({
         value: video.id,
         label: video.title.length > 60 ? `${video.title.slice(0, 60)}...` : video.title,
     }));
 
+    // load options for react-select
     const loadOptions = async () => {
         const transformedOptions = selectVideoOptions;
         const more = hasMore;
@@ -204,6 +219,8 @@ function Assignments() {
         };
     };
 
+    // video select component
+    // infinite scroll for adding assignment
     const selectVideo = !isEdit ? (
         <AsyncPaginate
             form="modalForm"
@@ -243,6 +260,7 @@ function Assignments() {
         />
     );
 
+    // assignment form
     const assignmentForm = (
         <form id="modalForm" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2">
@@ -278,6 +296,7 @@ function Assignments() {
         </form>
     );
 
+    // assignment table
     const assignmentItems = isLoading ? (
         <Common.Loader />
     ) : (
@@ -306,18 +325,21 @@ function Assignments() {
         ))
     );
 
+    // close modal when assignment is added or edited successfully
     useEffect(() => {
         if (addedAssignment || editedAssignment) {
             setIsModalOpen(false);
         }
     }, [addedAssignment, editedAssignment]);
 
+    // fetch more videos when videos page is greater than 1
     useEffect(() => {
         if (videosPage > 1) {
             dispatch(videosAPI.endpoints.getMoreVideos.initiate(videosPage));
         }
     }, [videosPage, dispatch]);
 
+    // set hasMore to true if total page is greater than videos page
     useEffect(() => {
         if (totalCount > 0) {
             const more = Math.ceil(totalCount / import.meta.env.VITE_LIMIT_PER_PAGE) > videosPage;
@@ -325,15 +347,29 @@ function Assignments() {
         }
     }, [totalCount, videosPage]);
 
+    // set current page to total page when assignment is added
     useEffect(() => {
-        if (addedAssignment || deletedAssignment) {
+        if (addedAssignment) {
             const totalPage = getTotalPageNumber(totalCount);
             setCurrentPage(totalPage);
         }
-    }, [addedAssignment, deletedAssignment, totalCount]);
+    }, [addedAssignment, totalCount]);
+
+    // set current page to total page - 1 when assignment is deleted
+    useEffect(() => {
+        if (deletedAssignment) {
+            const assignmentLengthInCurrentPage = assignments?.length;
+            if (assignmentLengthInCurrentPage === 0) {
+                setCurrentPage((prevCurrentPage) =>
+                    prevCurrentPage > 1 ? prevCurrentPage - 1 : 1
+                );
+            }
+        }
+    }, [assignments?.length, deletedAssignment]);
 
     return (
         <div className="px-3 py-10 bg-opacity-10">
+            {/* Error and Success */}
             {(error ||
                 addAssignmentError ||
                 editAssignmentError ||
@@ -363,6 +399,8 @@ function Assignments() {
                     }
                 />
             )}
+
+            {/* Add button */}
             <div className="w-full flex">
                 <button
                     type="button"
@@ -372,6 +410,8 @@ function Assignments() {
                     Add Assignment
                 </button>
             </div>
+
+            {/* Assignments table */}
             {assignmentItems?.length > 0 ? (
                 <div className="overflow-x-auto mt-4">
                     <table className="divide-y-1 text-base divide-gray-600 w-full">
@@ -391,6 +431,7 @@ function Assignments() {
                 <Common.Info info="No Assignments Found" />
             )}
 
+            {/* Pagination */}
             <div className="mt-5 fixed bottom-10 w-full max-w-7xl flex justify-end">
                 <Pagination
                     showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} videos`}
@@ -399,6 +440,8 @@ function Assignments() {
                     onChange={onPaginationChange}
                 />
             </div>
+
+            {/* Modal */}
             <Common.Modal
                 open={isModalOpen}
                 onClose={onClose}

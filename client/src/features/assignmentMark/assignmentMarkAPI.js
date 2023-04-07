@@ -2,6 +2,7 @@ import { apiSlice } from '../api/apiSlice';
 
 export const assignmentMarkAPI = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        // create new assignmentMark
         addAssignmentMark: builder.mutation({
             query: (data) => {
                 const { user } = JSON.parse(localStorage.getItem('auth'));
@@ -22,6 +23,8 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             async onQueryStarted(data, { dispatch, queryFulfilled }) {
                 try {
                     const { data: newAssignmentMark } = await queryFulfilled;
+
+                    // update with new assignmentMark in assignmentMarks
                     if (newAssignmentMark) {
                         await dispatch(
                             assignmentMarkAPI.util.upsertQueryData(
@@ -37,6 +40,7 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get assignmentMark by assignment id
         getAssignmentMarksByAssignmentId: builder.query({
             query: (id) =>
                 `/assignmentMark?assignment_id=${id}&student_id=${
@@ -50,6 +54,7 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get assignmentMarks by page
         getAssignmentMarks: builder.query({
             query: (page) =>
                 `/assignmentMark?_page=${page}&_limit=${import.meta.env.VITE_LIMIT_PER_PAGE}`,
@@ -63,16 +68,19 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        // get all assignmentMarks
         getAllAssignmentMarks: builder.query({
             query: () => `/assignmentMark`,
         }),
 
+        // get assignmentMarks length by status
         getAssignmentMarksByStatus: builder.query({
             query: (status) => `/assignmentMark?status=${status}`,
 
             transformResponse: (response) => response.length,
         }),
 
+        // update assignmentMark
         editAssignmentMark: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/assignmentMark/${id}`,
@@ -85,6 +93,8 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data: updatedAssignmentMark } = await queryFulfilled;
+
+                    // update with new assignmentMark in assignmentMarks by page
                     if (updatedAssignmentMark) {
                         await dispatch(
                             assignmentMarkAPI.util.updateQueryData(

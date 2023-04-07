@@ -1227,13 +1227,6 @@
       "totalMark": 1
     },
     {
-      "id": 30,
-      "title": "Praesent blandit.",
-      "video_id": 30,
-      "video_title": "Maecenas tristique, est et tempus semper, est quam pharetra magna, ac consequat metus sapien ut nunc.",
-      "totalMark": 27
-    },
-    {
       "id": 31,
       "title": "In quis justo.",
       "video_id": 31,
@@ -1288,13 +1281,6 @@
       "video_id": 38,
       "video_title": "Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
       "totalMark": 21
-    },
-    {
-      "id": 39,
-      "title": "Ut tellus.",
-      "video_id": 39,
-      "video_title": "Vivamus vestibulum sagittis sapien.",
-      "totalMark": 38
     },
     {
       "id": 40,
@@ -1680,55 +1666,6 @@
       "video_id": 94,
       "video_title": "Nulla facilisi.",
       "totalMark": 12
-    },
-    {
-      "id": 95,
-      "title": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.",
-      "video_id": 95,
-      "video_title": "Phasellus sit amet erat.",
-      "totalMark": 51
-    },
-    {
-      "id": 96,
-      "title": "Curabitur convallis.",
-      "video_id": 96,
-      "video_title": "Proin at turpis a pede posuere nonummy.",
-      "totalMark": 77
-    },
-    {
-      "id": 97,
-      "title": "Maecenas tincidunt lacus at velit.",
-      "video_id": 97,
-      "video_title": "Proin interdum mauris non ligula pellentesque ultrices.",
-      "totalMark": 11
-    },
-    {
-      "id": 98,
-      "title": "Donec dapibus.",
-      "video_id": 98,
-      "video_title": "Proin leo odio, porttitor id, consequat in, consequat ut, nulla.",
-      "totalMark": 67
-    },
-    {
-      "id": 99,
-      "title": "Nullam molestie nibh in lectus.",
-      "video_id": 99,
-      "video_title": "Nulla tellus.",
-      "totalMark": 61
-    },
-    {
-      "id": 100,
-      "title": "Integer a nibh.",
-      "video_id": 100,
-      "video_title": "Nulla nisl.",
-      "totalMark": 75
-    },
-    {
-      "title": "Assignment 3",
-      "video_id": 11,
-      "video_title": "Sed ante. Vivamus tortor. Duis mattis egestas metus. Aenean ...",
-      "totalMark": 100,
-      "id": 101
     }
   ],
   "quizzes": [

@@ -2,19 +2,21 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import learningPortalImage from '../../assets/image/learningportal.svg';
-import { userLoggedOut } from '../../features/auth/authSlice';
-import { authAPI } from '../../features/auth/authAPI';
-import { quizMarkAPI } from '../../features/quizMark/quizMark';
 import { assignmentMarkAPI } from '../../features/assignmentMark/assignmentMarkAPI';
+import { assignmentsAPI } from '../../features/assignments/assignmentsAPI';
+import { authAPI } from '../../features/auth/authAPI';
+import { userLoggedOut } from '../../features/auth/authSlice';
+import { quizMarkAPI } from '../../features/quizMark/quizMark';
 import { quizzesAPI } from '../../features/quizzes/quizzesAPI';
 import { videosAPI } from '../../features/videos/videosAPI';
-import { assignmentsAPI } from '../../features/assignments/assignmentsAPI';
 
 function Navbar() {
     const { name, role } = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
     const { pathname } = useLocation();
 
+    // handle logout and reset all api states
+    // cant do it in userLoggedOut reducer cause it is making a cyclic dependency
     const handleLogout = () => {
         dispatch(userLoggedOut());
         dispatch(authAPI.util.resetApiState());
@@ -31,7 +33,9 @@ function Navbar() {
                 <Link to="/">
                     <img className="h-10" src={learningPortalImage} alt={learningPortalImage} />
                 </Link>
+
                 <div className="flex items-center gap-3">
+                    {/* Navmenu based on user role */}
                     {role === 'student' && (
                         <Link
                             to="/leaderboard"
@@ -54,6 +58,8 @@ function Navbar() {
                     >
                         {name}
                     </h2>
+
+                    {/* Logout button */}
                     <button
                         type="button"
                         className={`flex gap-2   items-center px-4 py-1 rounded-full text-sm transition-all  ${

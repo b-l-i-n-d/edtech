@@ -4,13 +4,14 @@ function Question({ quiz, count, selectedOption, setSelectedOption, isSubmitted 
     const { question, options } = quiz;
 
     const handleChange = (e) => {
-        // if checked the add to selctedOption array as {quizId: quizId, optionId: [optionId]} and if quizId is already in the array then add optionId to the optionId array
         const { id, checked } = e.target;
         const quizId = quiz.id;
         const optionId = Number(id.split('-')[1]);
 
+        // if checked then add to selectedOption array
         if (checked) {
             const index = selectedOption.findIndex((option) => option.quizId === quizId);
+
             if (index !== -1) {
                 const { optionId: selectedOptionId } = selectedOption[index];
                 const newOptionId = [...selectedOptionId, optionId];
@@ -37,6 +38,8 @@ function Question({ quiz, count, selectedOption, setSelectedOption, isSubmitted 
         }
     };
 
+    // generating optionList based on isSubmitted
+    // if isSubmitted then disable the checkbox and show the correct answer
     const optionList = isSubmitted
         ? options.map((option) => (
               <label

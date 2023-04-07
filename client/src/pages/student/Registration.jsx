@@ -8,7 +8,7 @@ import { useRegisterMutation } from '../../features/auth/authAPI';
 function Registration() {
     const [register, { data, isLoading, error: registerError }] = useRegisterMutation();
     const navigate = useNavigate();
-    const [error, setError] = useState('');
+    const [error, setError] = useState(''); // Error message
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,10 +16,12 @@ function Registration() {
         confirmPassword: '',
     });
 
+    // Handle change in input fields
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
@@ -33,6 +35,7 @@ function Registration() {
         }
     };
 
+    // Check if user is logged in
     useEffect(() => {
         if (registerError?.data) {
             setError(registerError?.data);

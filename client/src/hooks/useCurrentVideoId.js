@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useGetVideosQuery } from '../features/videos/videosAPI';
 import { videoSelected } from '../features/videos/videosSlice';
 
+// This hook is used to make sure all the data is loaded before rendering the app
 export default function useCurrentVideoId() {
     const dispatch = useDispatch();
     const [isCurrentVideoIdLoaded, setIsCurrentVideoIdLoaded] = useState(false);

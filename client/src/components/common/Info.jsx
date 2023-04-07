@@ -3,7 +3,7 @@ import React from 'react';
 function Info({ info }) {
     return (
         <div
-            className="flex p-4 my-5 text-sm  rounded-lg w-full bg-gray-800 text-blue-400"
+            className="flex p-4 my-5 text-sm rounded-lg w-full bg-gray-800 text-blue-400"
             role="alert"
         >
             <svg
