@@ -3,6 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import learningPortalImage from '../../assets/image/learningportal.svg';
 import { userLoggedOut } from '../../features/auth/authSlice';
+import { authAPI } from '../../features/auth/authAPI';
+import { quizMarkAPI } from '../../features/quizMark/quizMark';
+import { assignmentMarkAPI } from '../../features/assignmentMark/assignmentMarkAPI';
+import { quizzesAPI } from '../../features/quizzes/quizzesAPI';
+import { videosAPI } from '../../features/videos/videosAPI';
+import { assignmentsAPI } from '../../features/assignments/assignmentsAPI';
 
 function Navbar() {
     const { name, role } = useSelector((state) => state.auth.user);
@@ -11,6 +17,12 @@ function Navbar() {
 
     const handleLogout = () => {
         dispatch(userLoggedOut());
+        dispatch(authAPI.util.resetApiState());
+        dispatch(quizMarkAPI.util.resetApiState());
+        dispatch(assignmentMarkAPI.util.resetApiState());
+        dispatch(quizzesAPI.util.resetApiState());
+        dispatch(videosAPI.util.resetApiState());
+        dispatch(assignmentsAPI.util.resetApiState());
     };
 
     return (
