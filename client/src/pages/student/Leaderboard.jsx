@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useGetAssignmentMarksQuery } from '../../features/assignmentMark/assignmentMarkAPI';
+import { useGetAllAssignmentMarksQuery } from '../../features/assignmentMark/assignmentMarkAPI';
 import { useGetQuizMarksQuery } from '../../features/quizMark/quizMark';
 import { useGetUsersQuery } from '../../features/users/usersAPI';
 import { generateLeaderboard } from '../../utils';
@@ -9,9 +9,7 @@ function Leaderboard() {
     const currentUser = useSelector((state) => state.auth.user);
     const { data: users } = useGetUsersQuery();
     const { data: quizMarks } = useGetQuizMarksQuery();
-    const { data: assignmentMarksData } = useGetAssignmentMarksQuery();
-
-    const { assignmentMarks } = assignmentMarksData || {};
+    const { data: assignmentMarks } = useGetAllAssignmentMarksQuery();
 
     const generatedLeaderboard = useMemo(
         () =>

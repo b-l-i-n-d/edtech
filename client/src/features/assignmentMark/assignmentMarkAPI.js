@@ -63,6 +63,10 @@ export const assignmentMarkAPI = apiSlice.injectEndpoints({
             },
         }),
 
+        getAllAssignmentMarks: builder.query({
+            query: () => `/assignmentMark`,
+        }),
+
         getAssignmentMarksByStatus: builder.query({
             query: (status) => `/assignmentMark?status=${status}`,
 
@@ -116,6 +120,7 @@ export const {
     useAddAssignmentMarkMutation,
     useGetAssignmentMarksByAssignmentIdQuery,
     useGetAssignmentMarksQuery,
+    useGetAllAssignmentMarksQuery,
     useGetAssignmentMarksByStatusQuery,
     useEditAssignmentMarkMutation,
 } = assignmentMarkAPI;
